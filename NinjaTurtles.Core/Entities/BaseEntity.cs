@@ -11,10 +11,10 @@ namespace NinjaTurtles.Core.Entities
     {
         [Key]
         public TId Id { get; set; }
-        public bool IsActive { get; set; }
-        public DateTime CreatedDate { get; set; }
+        public bool IsActive { get; set; } = true;
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
         public DateTime? ModifiedDate { get; set; }
-        public int CreatedBy { get; set; }
+        public int CreatedBy { get; set; } = 1;
         public int? ModifiedBy { get; set; }
     }
 }

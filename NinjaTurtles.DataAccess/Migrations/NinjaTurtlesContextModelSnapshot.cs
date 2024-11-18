@@ -64,7 +64,7 @@ namespace NinjaTurtles.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Customer");
+                    b.ToTable("Customer", (string)null);
                 });
 
             modelBuilder.Entity("NinjaTurtles.Entities.Concrete.CustomerQrVerification", b =>
@@ -110,7 +110,7 @@ namespace NinjaTurtles.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CustomerQrVerification");
+                    b.ToTable("CustomerQrVerification", (string)null);
                 });
 
             modelBuilder.Entity("NinjaTurtles.Entities.Concrete.ParamItem", b =>
@@ -151,7 +151,7 @@ namespace NinjaTurtles.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ParamItem");
+                    b.ToTable("ParamItem", (string)null);
                 });
 
             modelBuilder.Entity("NinjaTurtles.Entities.Concrete.Product", b =>
@@ -196,7 +196,7 @@ namespace NinjaTurtles.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("NinjaTurtles.Entities.Concrete.QrCodeDetail", b =>
@@ -281,7 +281,7 @@ namespace NinjaTurtles.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("QrCodeDetail");
+                    b.ToTable("QrCodeDetail", (string)null);
                 });
 
             modelBuilder.Entity("NinjaTurtles.Entities.Concrete.QrCodeMain", b =>
@@ -326,7 +326,7 @@ namespace NinjaTurtles.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("QrCodeMain");
+                    b.ToTable("QrCodeMain", (string)null);
                 });
 
             modelBuilder.Entity("NinjaTurtles.Entities.Concrete.QrLog", b =>
@@ -364,7 +364,7 @@ namespace NinjaTurtles.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("QrLog");
+                    b.ToTable("QrLog", (string)null);
                 });
 #pragma warning restore 612, 618
         }

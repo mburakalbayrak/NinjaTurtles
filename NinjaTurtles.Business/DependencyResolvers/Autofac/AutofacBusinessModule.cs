@@ -1,5 +1,7 @@
 ﻿using Autofac;
 using AutoMapper;
+using NinjaTurtles.Business.Abstract;
+using NinjaTurtles.Business.Concrete;
 using NinjaTurtles.DataAccess.Abstract;
 using NinjaTurtles.DataAccess.Concrete.EntityFramework;
 
@@ -18,6 +20,9 @@ namespace NinjaTurtles.Business.DependencyResolvers.Autofac
             builder.RegisterType<EfQrCodeMainDal>().As<IQrCodeMainDal>();
             builder.RegisterType<EfQrCodeDetailDal>().As<IQrCodeDetailDal>();
             builder.RegisterType<EfQrLogDal>().As<IQrLogDal>();
+
+
+            builder.RegisterType<CustomerManager>().As<ICustomerService>();
 
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 

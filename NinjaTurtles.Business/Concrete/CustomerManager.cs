@@ -13,10 +13,29 @@ namespace NinjaTurtles.Business.Concrete
         private ICustomerDal _customerDal;
         private IMapper _mapper;
 
+        public CustomerManager(ICustomerDal customerDal)
+        {
+            _customerDal = customerDal;
+        }
+
         public IResult Add(AddCustomerDto dto)
         {
-            var customer = _mapper.Map<Customer>(dto);
-            _customerDal.Add(customer);
+            //var customerData = _mapper.Map<Customer>(dto);
+
+            var customerData = new Customer
+            {
+                CreatedBy = 1, // TO:DO
+                CreatedDate = DateTime.Now,
+                Email = dto.EmailName,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                IsActive = true,
+                IsDeleted = false,
+                PhoneNumber = dto.PhoneNumber,
+
+            };
+
+            _customerDal.Add(customerData);
             return new Result(true, Messages.CustomerAdded);
         }
 

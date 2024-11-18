@@ -1,0 +1,10 @@
+﻿namespace NinjaTurtles.Entities.Dtos
+{
+    public class AddCustomerDto
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string EmailName { get; set; }
+        public string PhoneNumber { get; set; }
+    }
+}

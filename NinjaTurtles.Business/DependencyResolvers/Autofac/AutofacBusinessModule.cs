@@ -9,8 +9,15 @@ namespace NinjaTurtles.Business.DependencyResolvers.Autofac
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<EfProductDal>().As<IProductDal>();
             builder.RegisterType<AutoMapperProfiles>().As<Profile>();
+
+            builder.RegisterType<EfProductDal>().As<IProductDal>();
+            builder.RegisterType<EfCustomerDal>().As<ICustomerDal>();
+            builder.RegisterType<EfCustomerQrVerificationDal>().As<ICustomerQrVerificationDal>();
+            builder.RegisterType<EfParamItemDal>().As<IParamItemDal>();
+            builder.RegisterType<EfQrCodeMainDal>().As<IQrCodeMainDal>();
+            builder.RegisterType<EfQrCodeDetailDal>().As<IQrCodeDetailDal>();
+            builder.RegisterType<EfQrLogDal>().As<IQrLogDal>();
 
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 

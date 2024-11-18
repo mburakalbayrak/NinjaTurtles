@@ -23,7 +23,7 @@ namespace NinjaTurtles.Business.Concrete
         public IResult Delete(int id)
         {
             var customer =_customerDal.Get(c=>c.Id == id);
-            customer.IsActive = false;
+            customer.IsDeleted = false;
             _customerDal.Update(customer);
             return new Result(true, Messages.CustomerDeleted);
         }

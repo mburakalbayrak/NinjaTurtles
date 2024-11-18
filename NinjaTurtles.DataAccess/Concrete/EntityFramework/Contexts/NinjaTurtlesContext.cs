@@ -53,8 +53,10 @@ namespace NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts
         public DbSet<Product> Products { get; set; }
         public DbSet<QrCodeMain> QrCodeMain { get; set; }
         public DbSet<Customer> Customer { get; set; }
+        public DbSet<CustomerQrVerification> CustomerQrVerification { get; set; }
+        public DbSet<QrLog> QrLog { get; set; }
+        public DbSet<ParamItem> ParamItem { get; set; }
         public DbSet<QrCodeDetail> QrCodeDetail { get; set; }
-
 
     }
 }

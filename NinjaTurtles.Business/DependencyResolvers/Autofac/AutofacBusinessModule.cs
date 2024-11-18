@@ -1,14 +1,7 @@
 ﻿using Autofac;
-using NinjaTurtles.Business.Abstract;
-using NinjaTurtles.Business.Concrete;
+using AutoMapper;
 using NinjaTurtles.DataAccess.Abstract;
 using NinjaTurtles.DataAccess.Concrete.EntityFramework;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NinjaTurtles.Business.DependencyResolvers.Autofac
 {
@@ -17,7 +10,7 @@ namespace NinjaTurtles.Business.DependencyResolvers.Autofac
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<EfProductDal>().As<IProductDal>();
-
+            builder.RegisterType<AutoMapperProfiles>().As<Profile>();
 
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 

@@ -47,6 +47,18 @@ namespace NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts
                 .Property(p => p.Id)
                 .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
 
+            modelBuilder.Entity<CustomerQrVerification>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
+
+            modelBuilder.Entity<QrLog>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
+
+            modelBuilder.Entity<ParamItem>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
+
             base.OnModelCreating(modelBuilder);
         }
 

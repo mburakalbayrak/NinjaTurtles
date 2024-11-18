@@ -8,7 +8,7 @@ namespace NinjaTurtles.Business
     {
         public AutoMapperProfiles()
         {
-            CreateMap<AddCustomerDto, Customer>();
+            CreateMap<AddCustomerDto, Customer>().ReverseMap();
         }
     }
 }

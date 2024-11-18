@@ -1,0 +1,6 @@
+@NinjaTurtles.WebApi_HostAddress = http://localhost:5192
+
+GET {{NinjaTurtles.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

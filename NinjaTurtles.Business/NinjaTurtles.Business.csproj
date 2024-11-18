@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="8.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\NinjaTurtles.DataAccess\NinjaTurtles.DataAccess.csproj" />
     <ProjectReference Include="..\NinjaTurtles.Entities\NinjaTurtles.Entities.csproj" />
   </ItemGroup>

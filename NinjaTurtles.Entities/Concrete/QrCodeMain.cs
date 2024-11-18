@@ -14,5 +14,6 @@ namespace NinjaTurtles.Entities.Concrete
         public string? Url { get; set; }
         public string? ImageUrl { get; set; }
         public int? QrDetailId { get; set; }
+        public bool IsDeleted { get; set; }
     }
 }

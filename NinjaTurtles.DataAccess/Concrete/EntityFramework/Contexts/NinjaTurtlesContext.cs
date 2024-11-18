@@ -43,12 +43,17 @@ namespace NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts
                 .Property(p => p.Id)
                 .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
 
+            modelBuilder.Entity<QrCodeDetail>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
+
             base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<Product> Products { get; set; }
         public DbSet<QrCodeMain> QrCodeMain { get; set; }
         public DbSet<Customer> Customer { get; set; }
+        public DbSet<QrCodeDetail> QrCodeDetail { get; set; }
 
 
     }

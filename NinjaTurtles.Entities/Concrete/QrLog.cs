@@ -7,6 +7,5 @@ namespace NinjaTurtles.Entities.Concrete
         public int LogTypeId { get; set; }
         public int QrCodeMainId { get; set; }
         public string IpAddress { get; set; }
-        public QrCodeMain QrCodeMain { get; set; }
     }
 }

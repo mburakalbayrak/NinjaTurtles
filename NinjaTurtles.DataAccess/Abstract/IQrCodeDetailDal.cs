@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace NinjaTurtles.DataAccess.Abstract
 {
-    public interface ICustomerDal : IEntityRepository<Customer>
+    public interface IQrCodeDetailDal : IEntityRepository<QrCodeDetail>
     {
     }
 }

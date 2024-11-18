@@ -10,8 +10,5 @@ namespace NinjaTurtles.Entities.Concrete
         public int Code { get; set; }
         public DateTime? ExpireDate { get; set; }
         public bool VerifyDate { get; set; }
-        
-        public Customer Customer { get; set; }
-        public QrCodeMain QrCodeMain { get; set; }
     }
 }

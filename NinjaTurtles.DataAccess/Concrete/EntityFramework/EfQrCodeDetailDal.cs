@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace NinjaTurtles.DataAccess.Concrete.EntityFramework
 {
-    public class EfCustomerDal : EfEntityRepositoryBase<Customer, NinjaTurtlesContext>, ICustomerDal
+    public class EfQrCodeDetailDal : EfEntityRepositoryBase<QrCodeDetail, NinjaTurtlesContext>, IQrCodeDetailDal
     {
     }
 }

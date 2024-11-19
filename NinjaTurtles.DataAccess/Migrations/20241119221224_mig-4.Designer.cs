@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts;
 
@@ -11,9 +12,11 @@ using NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts;
 namespace NinjaTurtles.DataAccess.Migrations
 {
     [DbContext(typeof(NinjaTurtlesContext))]
-    partial class NinjaTurtlesContextModelSnapshot : ModelSnapshot
+    [Migration("20241119221224_mig-4")]
+    partial class mig4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

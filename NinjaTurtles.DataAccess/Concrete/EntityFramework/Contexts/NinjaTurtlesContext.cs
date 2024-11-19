@@ -35,9 +35,9 @@ namespace NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts
                 .Property(p => p.Id)
                 .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
 
-            modelBuilder.Entity<QrCodeMain>()
-                .Property(p => p.Id)
-                .HasDefaultValueSql("NEWID()"); // Otomatik Guid atayacak
+            //modelBuilder.Entity<QrCodeMain>()
+            //    .Property(p => p.Id)
+            //    .HasDefaultValueSql("NEWID()"); // Otomatik Guid atayacak
 
             modelBuilder.Entity<Customer>()
                 .Property(p => p.Id)
@@ -59,6 +59,14 @@ namespace NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts
                 .Property(p => p.Id)
                 .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
 
+            modelBuilder.Entity<CompanyOrder>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
+
+            modelBuilder.Entity<CompanyOrderDetail>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -69,6 +77,8 @@ namespace NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts
         public DbSet<QrLog> QrLog { get; set; }
         public DbSet<ParamItem> ParamItem { get; set; }
         public DbSet<QrCodeDetail> QrCodeDetail { get; set; }
+        public DbSet<CompanyOrder> CompanyOrder { get; set; }
+        public DbSet<CompanyOrderDetail> CompanyOrderDetail { get; set; }
 
     }
 }

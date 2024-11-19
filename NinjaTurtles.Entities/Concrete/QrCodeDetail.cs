@@ -1,9 +1,4 @@
 ﻿using NinjaTurtles.Core.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NinjaTurtles.Entities.Concrete
 {
@@ -28,5 +23,7 @@ namespace NinjaTurtles.Entities.Concrete
         public string? SecondaryContactFullName { get; set; } // 2. Yakınlık Ad Soyad
         public string? PrimaryContactPhone { get; set; } // 1. Yakın Telefon
         public string? SecondaryContactPhone { get; set; } // 2. Yakın Telefon
+        public string? Url { get; set; } // Url Link ekleyebilir
+        public string? Description { get; set; } // Bireysel Not olarak da kullanılabilir 
     }
 }

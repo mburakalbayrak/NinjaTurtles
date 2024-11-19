@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NinjaTurtles.Business.Abstract;
+using NinjaTurtles.Core.Helpers.QrCode;
+using NinjaTurtles.Core.NetCoreConfiguration;
+using NinjaTurtles.Entities.Config;
 using NinjaTurtles.Entities.Dtos;
+using System.Drawing.Imaging;
 
 namespace NinjaTurtles.WebApi.Controllers
 {
@@ -26,6 +30,14 @@ namespace NinjaTurtles.WebApi.Controllers
         public IActionResult Delete(int id)
         {
             var result = _customerService.Delete(id);
+            return Ok(result);
+        }
+
+        [HttpPost("[action]")]
+        public IActionResult SaveQrCode([FromBody] string url)
+        {
+            var filePath = $"D:/UploadFiles/QrCode/{url}.png";
+            var result = QRCodeHelper.SaveQRCodeAsImage(url,filePath,ImageFormat.Png);
             return Ok(result);
         }
     }

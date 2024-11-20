@@ -17,12 +17,14 @@ namespace NinjaTurtles.Business.DependencyResolvers.Autofac
             builder.RegisterType<EfCustomerDal>().As<ICustomerDal>();
             builder.RegisterType<EfCustomerQrVerificationDal>().As<ICustomerQrVerificationDal>();
             builder.RegisterType<EfParamItemDal>().As<IParamItemDal>();
+            builder.RegisterType<EfCompanyOrderDal>().As<ICompanyOrderDal>();
+            builder.RegisterType<EfCompanyOrderDetailDal>().As<ICompanyOrderDetailDal>();
             builder.RegisterType<EfQrCodeMainDal>().As<IQrCodeMainDal>();
             builder.RegisterType<EfQrCodeDetailDal>().As<IQrCodeDetailDal>();
             builder.RegisterType<EfQrLogDal>().As<IQrLogDal>();
 
-
             builder.RegisterType<CustomerManager>().As<ICustomerService>();
+            builder.RegisterType<CompanyOrderManager>().As<ICompanyOrderService>();
 
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 

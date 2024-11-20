@@ -25,5 +25,7 @@ namespace NinjaTurtles.Entities.Concrete
         public string? SecondaryContactPhone { get; set; } // 2. Yakın Telefon
         public string? Url { get; set; } // Url Link ekleyebilir
         public string? Description { get; set; } // Bireysel Not olarak da kullanılabilir 
+        public string? ProfilePictureUrl { get; set; } // Profil Fotoğrafı
+
     }
 }

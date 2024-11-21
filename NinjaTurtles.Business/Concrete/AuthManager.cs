@@ -26,7 +26,9 @@ namespace NinjaTurtles.Business.Concrete
 
         public IDataResult<Core.Utilities.Security.Jwt.AccessToken> CreateAccessToken(User user)
         {
-            throw new NotImplementedException();
+            var claims = _userService.GetClaims(user);
+            var accessToken = _tokenHelper.CreateToken(user, claims);
+            return new SuccessDataResult<Core.Utilities.Security.Jwt.AccessToken>(accessToken, Messages.AccessTokenCreated);
         }
 
         public IDataResult<User> Login(UserForLoginDto userForLoginDto)
@@ -48,7 +50,25 @@ namespace NinjaTurtles.Business.Concrete
 
         public IDataResult<User> Register(UserForRegisterDto userForRegisterDto, string password)
         {
-            throw new NotImplementedException();
+            byte[] passwordHash, passwordSalt;
+            HashingHelper.CreatePasswordHash(password, out passwordHash, out passwordSalt);
+
+            var user = new User 
+            { 
+                Email = userForRegisterDto.Email,
+                FirstName = userForRegisterDto.FirstName,
+                LastName = userForRegisterDto.LastName,
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt,
+                IsActive = true,
+                IsDeleted = false,
+                CreatedBy = 0,
+                CreatedDate = DateTime.Now,
+            };
+
+            _userService.Add(user);
+
+            return new SuccessDataResult<User>(user, Messages.UserRegistered);
         }
 
         public IResult UserExists(string email)

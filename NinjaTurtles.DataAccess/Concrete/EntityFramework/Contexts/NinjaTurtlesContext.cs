@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NinjaTurtles.Core.Entities.Concrete;
 using NinjaTurtles.Core.NetCoreConfiguration;
 using NinjaTurtles.Entities.Concrete;
 using NinjaTurtles.Entities.Config;

@@ -1,6 +1,6 @@
 ﻿using NinjaTurtles.Business.Abstract;
+using NinjaTurtles.Core.Entities.Concrete;
 using NinjaTurtles.DataAccess.Abstract;
-using NinjaTurtles.Entities.Concrete;
 using System;
 using System.Collections.Generic;
 using System.Linq;

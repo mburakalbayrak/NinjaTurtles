@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NinjaTurtles.Entities.Concrete
+namespace NinjaTurtles.Core.Entities.Concrete
 {
     public class UserOperationClaim : IEntity
     {

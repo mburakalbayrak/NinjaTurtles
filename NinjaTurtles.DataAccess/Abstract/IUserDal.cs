@@ -1,5 +1,5 @@
 ﻿using NinjaTurtles.Core.DataAccess;
-using NinjaTurtles.Entities.Concrete;
+using NinjaTurtles.Core.Entities.Concrete;
 using System;
 using System.Collections.Generic;
 using System.Linq;

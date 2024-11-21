@@ -1,7 +1,7 @@
 ﻿using NinjaTurtles.Core.DataAccess.EntityFramework;
+using NinjaTurtles.Core.Entities.Concrete;
 using NinjaTurtles.DataAccess.Abstract;
 using NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts;
-using NinjaTurtles.Entities.Concrete;
 using System;
 using System.Collections.Generic;
 using System.Linq;

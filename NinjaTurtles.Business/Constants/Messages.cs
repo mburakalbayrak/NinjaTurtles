@@ -15,6 +15,11 @@ namespace NinjaTurtles.Business.Constants
         public static string CustomerDeleted = "Hesabınız silinmiştir.";
         public static string CompanyOrderAdded = "Firma başarıyla eklendi";
         public static string CompanyOrderDetailAdded = "Sipariş başarıyla oluşturuldu";
+        public static string UserNotFound = "Kullanıcı bulunamadı";
+        public static string PasswordError = "Şifre hatalı";
+        public static string SuccessfulLogin = "Giriş başarılı";
+        public static string UserAlreadyExists = "Kullanıcı zaten mevcut";
+
 
     }
 }

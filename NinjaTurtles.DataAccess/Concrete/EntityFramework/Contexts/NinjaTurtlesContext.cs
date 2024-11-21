@@ -67,6 +67,18 @@ namespace NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts
                 .Property(p => p.Id)
                 .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
 
+            modelBuilder.Entity<User>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
+
+            modelBuilder.Entity<OperationClaim>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
+
+            modelBuilder.Entity<UserOperationClaim>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -79,6 +91,10 @@ namespace NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts
         public DbSet<QrCodeDetail> QrCodeDetail { get; set; }
         public DbSet<CompanyOrder> CompanyOrder { get; set; }
         public DbSet<CompanyOrderDetail> CompanyOrderDetail { get; set; }
+        public DbSet<User> User { get; set; }
+        public DbSet<OperationClaim> OperationClaim { get; set; }
+        public DbSet<UserOperationClaim> UserOperationClaim { get; set; }
+        
 
     }
 }

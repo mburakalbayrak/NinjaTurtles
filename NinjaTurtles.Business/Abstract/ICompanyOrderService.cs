@@ -6,7 +6,7 @@ namespace NinjaTurtles.Business.Abstract
     public interface ICompanyOrderService
     {
         IResult Add(string name);
-        IResult AddDetail(AddCompanyOrderDetailDto dto);
+        IResult AddDetail(AddCompanyOrderDetailDto dto,string path);
 
     }
 }

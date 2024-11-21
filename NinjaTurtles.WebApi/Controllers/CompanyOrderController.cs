@@ -29,7 +29,8 @@ namespace NinjaTurtles.WebApi.Controllers
         [HttpPost("[action]")]
         public IActionResult AddCompanyOrder([FromBody] AddCompanyOrderDetailDto dto)
         {
-            var result = _companyOrderService.AddDetail(dto);
+            var currentdirectory = Directory.GetCurrentDirectory();
+            var result = _companyOrderService.AddDetail(dto,currentdirectory);
             return Ok(result);
         }
 

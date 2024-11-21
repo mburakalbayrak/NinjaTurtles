@@ -36,7 +36,7 @@ namespace NinjaTurtles.Business.Concrete
             return new Result(true, Messages.CustomerAdded);
         }
 
-        public IResult AddDetail(AddCompanyOrderDetailDto dto)
+        public IResult AddDetail(AddCompanyOrderDetailDto dto,string path)
         {
             var cod = new CompanyOrderDetail();
             cod.CompanyOrderId = dto.CompanyOrderId;
@@ -50,7 +50,8 @@ namespace NinjaTurtles.Business.Concrete
 
             var company = _companyOrder.Get(c => c.Id == cod.CompanyOrderId);
 
-            var basedirectory = $"D:/UploadFiles/QrCode/{company.Name}/{cod.Id}";
+
+            var basedirectory = $"{path}/UploadFiles/QrCode/{company.Name}/{cod.Id}";
             DirectoryInfo di = Directory.CreateDirectory(basedirectory);
 
             var url = "www.karekodla.com/Qr/";

@@ -44,9 +44,13 @@ namespace NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts
                 .Property(p => p.Id)
                 .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
 
-            modelBuilder.Entity<QrCodeDetail>()
+            modelBuilder.Entity<QrCodeHumanDetail>()
                 .Property(p => p.Id)
                 .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
+
+            modelBuilder.Entity<QrCodeAnimalDetail>()
+         .Property(p => p.Id)
+         .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
 
             modelBuilder.Entity<CustomerQrVerification>()
                 .Property(p => p.Id)
@@ -89,7 +93,8 @@ namespace NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts
         public DbSet<CustomerQrVerification> CustomerQrVerification { get; set; }
         public DbSet<QrLog> QrLog { get; set; }
         public DbSet<ParamItem> ParamItem { get; set; }
-        public DbSet<QrCodeDetail> QrCodeDetail { get; set; }
+        public DbSet<QrCodeHumanDetail> QrCodeHumanDetail { get; set; }
+        public DbSet<QrCodeAnimalDetail> QrCodeAnimalDetail { get; set; }
         public DbSet<CompanyOrder> CompanyOrder { get; set; }
         public DbSet<CompanyOrderDetail> CompanyOrderDetail { get; set; }
         public DbSet<User> User { get; set; }

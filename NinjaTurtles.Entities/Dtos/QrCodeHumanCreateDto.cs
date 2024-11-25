@@ -1,9 +1,8 @@
-﻿using NinjaTurtles.Core.Entities;
-
-namespace NinjaTurtles.Entities.Concrete
+﻿namespace NinjaTurtles.Entities.Dtos
 {
-    public class QrCodeDetail:BaseEntity<int>, IEntity
+    public class QrCodeHumanCreateDto
     {
+        public Guid QrMainId { get; set; }
         public string? FullName { get; set; } // Ad Soyad
         public DateTime? DateOfBirth { get; set; } // Doğum Tarihi
         public int? GenderId { get; set; } // Cinsiyet (Id)
@@ -25,7 +24,5 @@ namespace NinjaTurtles.Entities.Concrete
         public string? SecondaryContactPhone { get; set; } // 2. Yakın Telefon
         public string? Url { get; set; } // Url Link ekleyebilir
         public string? Description { get; set; } // Bireysel Not olarak da kullanılabilir 
-        public string? ProfilePictureUrl { get; set; } // Profil Fotoğrafı
-
     }
 }

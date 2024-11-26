@@ -23,7 +23,7 @@ builder.Services.AddSwaggerGen();
 
 
 // burada WithOrigins ile domainimiz neyse react projesinde vs onu yazýyuoruz ki burasý dýþýnda baþka bir yerden istek gelirse cors hatasý versin  api endpoint https://localhost:44368/
-builder.Services.AddCors(options => options.AddPolicy("AllowOrigin", builder => builder.WithOrigins("http://localhost:44368")));
+//builder.Services.AddCors(options => options.AddPolicy("AllowOrigin", builder => builder.WithOrigins("http://localhost:44368")));
 
 var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger("JwtEventsLogger");
 
@@ -32,9 +32,9 @@ var tokenOptions = AppConfig.Configuration.GetSection("TokenOptions").Get<TokenO
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true, // token olsun yeter diyorsak bu false olacak, true olacaksa süreye bakar
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = false, // token olsun yeter diyorsak bu false olacak, true olacaksa süreye bakar
         ValidIssuer = tokenOptions?.Issuer,
         ValidAudience = tokenOptions?.Audience,
         ValidateIssuerSigningKey = true,
@@ -66,7 +66,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseCors(builder => builder.WithOrigins("http://localhost:44368").AllowAnyHeader());
+//app.UseCors(builder => builder.WithOrigins("http://localhost:44368").AllowAnyHeader());
 
 app.UseHttpsRedirection();
 

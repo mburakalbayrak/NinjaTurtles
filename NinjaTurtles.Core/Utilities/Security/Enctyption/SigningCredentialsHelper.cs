@@ -11,7 +11,7 @@ namespace NinjaTurtles.Core.Utilities.Security.Enctyption
     {
         public static SigningCredentials CreateSigningCredentials(SecurityKey securityKey)
         {
-            return new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
+            return new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
         }
     }
 }

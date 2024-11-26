@@ -38,7 +38,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidIssuer = tokenOptions?.Issuer,
         ValidAudience = tokenOptions?.Audience,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = SecurityKeyHelper.CreateSecurityKey(tokenOptions?.SecurityKey)
+        IssuerSigningKey = SecurityKeyHelper.CreateSecurityKey(tokenOptions?.SecurityKey),
+        ClockSkew = TimeSpan.Zero
     };
 
     // Events yapýlandýrmasý

@@ -21,7 +21,8 @@ namespace NinjaTurtles.Business.DependencyResolvers.Autofac
             builder.RegisterType<EfCompanyOrderDal>().As<ICompanyOrderDal>();
             builder.RegisterType<EfCompanyOrderDetailDal>().As<ICompanyOrderDetailDal>();
             builder.RegisterType<EfQrCodeMainDal>().As<IQrCodeMainDal>();
-            builder.RegisterType<EfQrCodeDetailDal>().As<IQrCodeDetailDal>();
+            builder.RegisterType<EfQrCodeHumanDetailDal>().As<IQrCodeHumanDetailDal>();
+            builder.RegisterType<EfQrCodeAnimalDetailDal>().As<IQrCodeAnimalDetailDal>();
             builder.RegisterType<EfQrLogDal>().As<IQrLogDal>();
             builder.RegisterType<EfUserDal>().As<IUserDal>();
 

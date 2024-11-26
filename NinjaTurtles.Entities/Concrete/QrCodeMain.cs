@@ -7,8 +7,8 @@ namespace NinjaTurtles.Entities.Concrete
         public int? CustomerId { get; set; }
         public string? RedirectUrl { get; set; }
         public string? ImageUrl { get; set; }
-        public int? QrDetailId { get; set; }
         public bool IsDeleted { get; set; }
         public int? CompanyOrderDetail { get; set; }
+        public int? DetailTypeId { get; set; }
     }
 }

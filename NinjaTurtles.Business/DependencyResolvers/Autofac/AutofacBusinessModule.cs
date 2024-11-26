@@ -2,6 +2,7 @@
 using AutoMapper;
 using NinjaTurtles.Business.Abstract;
 using NinjaTurtles.Business.Concrete;
+using NinjaTurtles.Core.Utilities.Security.Jwt;
 using NinjaTurtles.DataAccess.Abstract;
 using NinjaTurtles.DataAccess.Concrete.EntityFramework;
 
@@ -29,6 +30,7 @@ namespace NinjaTurtles.Business.DependencyResolvers.Autofac
             builder.RegisterType<ProductManager>().As<IProductService>();
             builder.RegisterType<UserManager>().As<IUserService>();
             builder.RegisterType<AuthManager>().As<IAuthService>();
+            builder.RegisterType<JwtHelper>().As<ITokenHelper>();
 
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 

@@ -14,6 +14,7 @@ namespace NinjaTurtles.Business.Constants
 
         public static string CustomerAdded = "Hesabınız başarıyla oluşturulmuştur.";
         public static string CustomerDeleted = "Hesabınız silinmiştir.";
+        public static string CustomerGetList = "Customerlar getirilmiştir.";
         public static string CompanyOrderAdded = "Firma başarıyla eklendi";
         public static string CompanyOrderDetailAdded = "Sipariş başarıyla oluşturuldu";
         public static string QrFilled = "Bilgileriniz karekodunuza başarıyla eşleştirilmilştir.";

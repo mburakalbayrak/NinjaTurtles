@@ -1,6 +1,7 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using NinjaTurtles.Business.DependencyResolvers.Autofac;
 using NinjaTurtles.Core.NetCoreConfiguration;
 using NinjaTurtles.Core.Utilities.Security.Enctyption;
@@ -22,7 +23,9 @@ builder.Services.AddSwaggerGen();
 
 
 // burada WithOrigins ile domainimiz neyse react projesinde vs onu yazýyuoruz ki burasý dýþýnda baþka bir yerden istek gelirse cors hatasý versin  api endpoint https://localhost:44368/
-builder.Services.AddCors(options => options.AddPolicy("AllowOrigin", builder => builder.WithOrigins("http://localhost:3000")));
+builder.Services.AddCors(options => options.AddPolicy("AllowOrigin", builder => builder.WithOrigins("http://localhost:44368")));
+
+var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger("JwtEventsLogger");
 
 var tokenOptions = AppConfig.Configuration.GetSection("TokenOptions").Get<TokenOptions>();
 
@@ -31,14 +34,30 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     {
         ValidateIssuer = true,
         ValidateAudience = true,
-        ValidateLifetime = false, // token olsun yeter diyorsak bu false olacak, true olacaksa süreye bakar
+        ValidateLifetime = true, // token olsun yeter diyorsak bu false olacak, true olacaksa süreye bakar
         ValidIssuer = tokenOptions?.Issuer,
         ValidAudience = tokenOptions?.Audience,
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = SecurityKeyHelper.CreateSecurityKey(tokenOptions?.SecurityKey)
+    };
 
+    // Events yapýlandýrmasý
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = context =>
+        {
+            logger.LogError($"Authentication failed: {context.Exception.Message}");
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            logger.LogInformation($"Token validated for: {context.Principal.Identity.Name}");
+            return Task.CompletedTask;
+        }
     };
 });
+
+
 
 var app = builder.Build();
 
@@ -47,14 +66,16 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseCors(builder => builder.WithOrigins("http://localhost:3000").AllowAnyHeader());
+app.UseCors(builder => builder.WithOrigins("http://localhost:44368").AllowAnyHeader());
 
 app.UseHttpsRedirection();
 
 app.UseRouting();
 
-app.UseAuthorization();
+// UseAuthentication üstte olmalý  UseAuthorization aþaðýda olmalý, UseAuthentication eve girmek için izindir, UseAuthorization evin içindeki mutfaða girmek için role gibi düþünebiliriz
 app.UseAuthentication();
+
+app.UseAuthorization();
 
 app.MapControllers(); // Controller rotalarýný ekle
 

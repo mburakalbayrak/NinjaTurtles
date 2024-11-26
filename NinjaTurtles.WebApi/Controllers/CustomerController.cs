@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NinjaTurtles.Business.Abstract;
 using NinjaTurtles.Core.Helpers.QrCode;
 using NinjaTurtles.Core.NetCoreConfiguration;
@@ -17,6 +18,14 @@ namespace NinjaTurtles.WebApi.Controllers
         public CustomerController(ICustomerService customerService)
         {
             _customerService = customerService;
+        }
+
+        [HttpGet("getList")]
+        [Authorize]
+        public IActionResult GetAll()
+        {
+            var result = _customerService.GetAll();
+            return Ok(result);
         }
 
         [HttpPost]

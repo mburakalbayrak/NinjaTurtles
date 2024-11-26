@@ -46,5 +46,10 @@ namespace NinjaTurtles.Business.Concrete
             _customerDal.Update(customer);
             return new Result(true, Messages.CustomerDeleted);
         }
+        public IDataResult<List<Customer>> GetAll()
+        {
+            var customerList = _customerDal.GetList(c => c.IsActive && !c.IsDeleted);
+            return new SuccessDataResult<List<Customer>>(customerList, Messages.CustomerGetList);
+        }
     }
 }

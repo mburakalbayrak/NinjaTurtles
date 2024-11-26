@@ -1,4 +1,5 @@
 ﻿using NinjaTurtles.Core.Utilities.Results;
+using NinjaTurtles.Entities.Concrete;
 using NinjaTurtles.Entities.Dtos;
 
 namespace NinjaTurtles.Business.Abstract
@@ -7,5 +8,6 @@ namespace NinjaTurtles.Business.Abstract
     {
         IResult Add(AddCustomerDto dto);
         IResult Delete(int id);
+        IDataResult<List<Customer>> GetAll();
     }
 }

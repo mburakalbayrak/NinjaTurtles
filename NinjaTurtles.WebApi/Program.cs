@@ -46,12 +46,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     {
         OnAuthenticationFailed = context =>
         {
-            logger.LogError($"Authentication failed: {context.Exception.Message}");
+            logger.LogError($"Authentication failed: {context?.Exception?.Message}");
             return Task.CompletedTask;
         },
         OnTokenValidated = context =>
         {
-            logger.LogInformation($"Token validated for: {context.Principal.Identity.Name}");
+            logger.LogInformation($"Token validated for: {context?.Principal?.Identity?.Name}");
             return Task.CompletedTask;
         }
     };

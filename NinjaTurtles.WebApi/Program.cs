@@ -32,8 +32,8 @@ var tokenOptions = AppConfig.Configuration.GetSection("TokenOptions").Get<TokenO
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
     {
-        ValidateIssuer = false,
-        ValidateAudience = false,
+        ValidateIssuer = true,
+        ValidateAudience = true,
         ValidateLifetime = false, // token olsun yeter diyorsak bu false olacak, true olacaksa süreye bakar
         ValidIssuer = tokenOptions?.Issuer,
         ValidAudience = tokenOptions?.Audience,
@@ -45,17 +45,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     // Events yapýlandýrmasý
     options.Events = new JwtBearerEvents
     {
+        OnMessageReceived = context =>
+        {
+            Console.WriteLine("Token received.");
+            return Task.CompletedTask;
+        },
         OnAuthenticationFailed = context =>
         {
-            logger.LogError($"Authentication failed: {context?.Exception?.Message}");
+            Console.WriteLine($"Authentication failed: {context.Exception.Message}");
             return Task.CompletedTask;
         },
         OnTokenValidated = context =>
         {
-            logger.LogInformation($"Token validated for: {context?.Principal?.Identity?.Name}");
+            Console.WriteLine($"Token validated for: {context.Principal.Identity.Name}");
             return Task.CompletedTask;
         }
     };
+
+    builder.Services.AddAuthorization();
 });
 
 
@@ -64,8 +71,6 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline
 
-app.UseSwagger();
-app.UseSwaggerUI();
 
 //app.UseCors(builder => builder.WithOrigins("http://localhost:44368").AllowAnyHeader());
 
@@ -73,10 +78,27 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
+app.Use(async (context, next) =>
+{
+    if (context.Request.Headers.ContainsKey("Authorization"))
+    {
+        var token = context.Request.Headers["Authorization"].FirstOrDefault();
+        Console.WriteLine($"Authorization Header: {token}");
+    }
+    else
+    {
+        Console.WriteLine("Authorization Header is missing.");
+    }
+    await next.Invoke();
+});
+
 // UseAuthentication üstte olmalý  UseAuthorization aþaðýda olmalý, UseAuthentication eve girmek için izindir, UseAuthorization evin içindeki mutfaða girmek için role gibi düþünebiliriz
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.MapControllers(); // Controller rotalarýný ekle
 

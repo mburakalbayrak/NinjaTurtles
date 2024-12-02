@@ -26,6 +26,7 @@ namespace NinjaTurtles.Business.DependencyResolvers.Autofac
             builder.RegisterType<EfQrLogDal>().As<IQrLogDal>();
             builder.RegisterType<EfUserDal>().As<IUserDal>();
 
+            builder.RegisterType<QrManager>().As<IQrService>();
             builder.RegisterType<CustomerManager>().As<ICustomerService>();
             builder.RegisterType<CompanyOrderManager>().As<ICompanyOrderService>();
             builder.RegisterType<ProductManager>().As<IProductService>();

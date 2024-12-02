@@ -19,35 +19,21 @@ namespace NinjaTurtles.WebApi.Controllers
         {
             _customerService = customerService;
         }
-
-        [HttpGet("getList")]
-        [Authorize(Roles = "Category.List")]
-        public IActionResult GetAll()
-        {
-            var result = _customerService.GetAll();
-            return Ok(result);
-        }
-
-        [HttpPost]
+    
+        [HttpPost("[action]")]
         public IActionResult Add([FromBody] AddCustomerDto dto)
         {
             var result =_customerService.Add(dto);
             return Ok(result);
         }
 
-        [HttpDelete]
+        [HttpDelete("[action]")]
         public IActionResult Delete(int id)
         {
             var result = _customerService.Delete(id);
             return Ok(result);
         }
 
-        [HttpPost("[action]")]
-        public IActionResult SaveQrCode([FromBody] string url)
-        {
-            var filePath = $"D:/UploadFiles/QrCode/{url}.png";
-            var result = QRCodeHelper.SaveQRCodeAsImage(url,filePath,ImageFormat.Png);
-            return Ok(result);
-        }
+    
     }
 }

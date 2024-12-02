@@ -8,10 +8,10 @@ namespace NinjaTurtles.Business
     {
         public AutoMapperProfiles()
         {
-            CreateMap<AddCustomerDto, Customer>().ReverseMap();
-            CreateMap<QrCodeHumanDetail, QrCodeHumanDetailDto>().ReverseMap();
-            CreateMap<QrCodeAnimalDetail, QrCodeAnimalDetailDto>().ReverseMap();
-            CreateMap<QrCodeHumanCreateDto, QrCodeHumanDetail>().ReverseMap();
+            CreateMap<AddCustomerDto, Customer>();
+            CreateMap<QrCodeHumanDetail, QrCodeHumanDetailDto>();
+            CreateMap<QrCodeAnimalDetail, QrCodeAnimalDetailDto>();
+            CreateMap<QrCodeHumanCreateDto, QrCodeHumanDetail>();
         }
     }
 }

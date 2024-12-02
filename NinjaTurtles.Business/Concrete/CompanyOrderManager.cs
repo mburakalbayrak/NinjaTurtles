@@ -38,41 +38,48 @@ namespace NinjaTurtles.Business.Concrete
 
         public IResult AddDetail(AddCompanyOrderDetailDto dto,string path)
         {
-            var cod = new CompanyOrderDetail();
-            cod.CompanyOrderId = dto.CompanyOrderId;
-            cod.ProductId = dto.ProductId;
-            cod.Quantity = dto.Quantity;
-            cod.LicenceUnitPrice = dto.LicenceUnitPrice;
-            cod.CreatedDate = DateTime.Now;
-            cod.CreatedBy = 1;
-            cod.IsActive = true;
-            _companyOrderDetail.Add(cod);
-
-            var company = _companyOrder.Get(c => c.Id == cod.CompanyOrderId);
-
-
-            var basedirectory = $"{path}/UploadFiles/QrCode/{company.Name}/{cod.Id}";
-            DirectoryInfo di = Directory.CreateDirectory(basedirectory);
-
-            var url = "www.karekodla.com/Qr/";
-            for (int i = 1; i <= cod.Quantity; i++)
+            try
             {
-                var guid = Guid.NewGuid();
-                var filePath = $"{basedirectory}/{guid}.png";
-                var barcodeContent = url + guid;
-                var result = QRCodeHelper.SaveQRCodeAsImage(barcodeContent, filePath, ImageFormat.Png);
+                var cod = new CompanyOrderDetail();
+                cod.CompanyOrderId = dto.CompanyOrderId;
+                cod.ProductId = dto.ProductId;
+                cod.Quantity = dto.Quantity;
+                cod.LicenceUnitPrice = dto.LicenceUnitPrice;
+                cod.CreatedDate = DateTime.Now;
+                cod.CreatedBy = 1;
+                cod.IsActive = true;
+                _companyOrderDetail.Add(cod);
 
-                var qrcodeMain = new QrCodeMain();
-                qrcodeMain.Id = guid;
-                qrcodeMain.ImageUrl = filePath;
-                qrcodeMain.RedirectUrl = url;
-                qrcodeMain.CreatedDate = DateTime.Now;
-                qrcodeMain.CreatedBy = 1;
-                qrcodeMain.IsActive = true;
-                _qrCodeMainDal.Add(qrcodeMain);
+                var company = _companyOrder.Get(c => c.Id == cod.CompanyOrderId);
+
+
+                var basedirectory = $"{path}/UploadFiles/QrCode/{company.Name}/{cod.Id}";
+                DirectoryInfo di = Directory.CreateDirectory(basedirectory);
+
+                var url = "www.karekodla.com/Qr/";
+                for (int i = 1; i <= cod.Quantity; i++)
+                {
+                    var guid = Guid.NewGuid();
+                    var filePath = $"{basedirectory}/{guid}.png";
+                    var barcodeContent = url + guid;
+                    var result = QRCodeHelper.SaveQRCodeAsImage(barcodeContent, filePath, ImageFormat.Png);
+
+                    var qrcodeMain = new QrCodeMain();
+                    qrcodeMain.Id = guid;
+                    qrcodeMain.ImageUrl = filePath;
+                    qrcodeMain.RedirectUrl = url;
+                    qrcodeMain.CreatedDate = DateTime.Now;
+                    qrcodeMain.CreatedBy = 1;
+                    qrcodeMain.IsActive = true;
+                    _qrCodeMainDal.Add(qrcodeMain);
+                }
+
+                return new Result(true, Messages.CompanyOrderDetailAdded);
             }
-
-            return new Result(true, Messages.CompanyOrderDetailAdded);
+            catch (Exception ex)
+            {
+                return new Result(false,ex.Message);
+            }
         }
     }
 }

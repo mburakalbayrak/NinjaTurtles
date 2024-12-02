@@ -19,7 +19,41 @@ builder.Host.ConfigureContainer<ContainerBuilder>(builder =>
 // Add services to the container
 builder.Services.AddControllers(); // Controller'lar için gerekli
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Version = "v1",
+        Title = "NinjaTurtles API",
+        Description = "API Documentation"
+    });
+
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Enter 'Bearer' [space] and then your token in the text input below.\n\nExample: 'Bearer 12345abcdef'"
+    });
+
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {} // Boþ býrakabilirsiniz veya belirli roller ekleyebilirsiniz
+        }
+    });
+});
 
 
 // burada WithOrigins ile domainimiz neyse react projesinde vs onu yazýyuoruz ki burasý dýþýnda baþka bir yerden istek gelirse cors hatasý versin  api endpoint https://localhost:44368/
@@ -75,6 +109,11 @@ var app = builder.Build();
 
 //app.UseCors(builder => builder.WithOrigins("http://localhost:44368").AllowAnyHeader());
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+
 app.UseHttpsRedirection();
 
 app.UseRouting();
@@ -99,7 +138,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseSwagger();
+
 app.UseSwaggerUI();
+
 
 app.MapControllers(); // Controller rotalarýný ekle
 

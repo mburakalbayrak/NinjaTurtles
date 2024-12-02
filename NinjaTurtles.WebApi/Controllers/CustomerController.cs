@@ -19,8 +19,16 @@ namespace NinjaTurtles.WebApi.Controllers
         {
             _customerService = customerService;
         }
-    
-        [HttpPost("[action]")]
+
+        [HttpGet("getList")]
+        [Authorize(Roles = "Customer.List")]
+        public IActionResult GetAll()
+        {
+            var result = _customerService.GetAll();
+            return Ok(result);
+        }
+
+        [HttpPost]
         public IActionResult Add([FromBody] AddCustomerDto dto)
         {
             var result =_customerService.Add(dto);

@@ -28,7 +28,7 @@ namespace NinjaTurtles.WebApi.Controllers
             return Ok(result);
         }
 
-        [HttpPost]
+        [HttpPost("[action]")]
         public IActionResult Add([FromBody] AddCustomerDto dto)
         {
             var result =_customerService.Add(dto);

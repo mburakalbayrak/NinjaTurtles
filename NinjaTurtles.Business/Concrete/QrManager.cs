@@ -33,6 +33,7 @@ namespace NinjaTurtles.Business.Concrete
             if (qr.DetailTypeId == null)
             {
                 qr.DetailTypeId = 2;
+                qr.CustomerId = dto.CustomerId;
                 _qrCodeAnimalDetailDal.Add(qrAnimal);
                 _qrCodeMainDal.Update(qr);
                 return new Result(true, Messages.QrFilled);
@@ -57,6 +58,7 @@ namespace NinjaTurtles.Business.Concrete
             if (qr.DetailTypeId == null)
             {
                 qr.DetailTypeId = 1;
+                qr.CustomerId = dto.CustomerId;
                 _qrCodeHumanDetailDal.Add(qrHuman);
                 _qrCodeMainDal.Update(qr);
                 return new Result(true, Messages.QrFilled);

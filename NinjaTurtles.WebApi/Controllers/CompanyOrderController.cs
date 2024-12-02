@@ -19,6 +19,13 @@ namespace NinjaTurtles.WebApi.Controllers
             _companyOrderService = companyOrderService;
         }
 
+        [HttpGet("getList")]
+        public IActionResult GetList()
+        {
+            var result = _companyOrderService.GetList();
+            return Ok(result);
+        }
+
         [HttpPost("[action]")]
         public IActionResult Add([FromBody] string name)
         {

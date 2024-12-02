@@ -8,6 +8,8 @@ using static QRCoder.PayloadGenerator;
 using System.Drawing.Imaging;
 using System.IO;
 using NinjaTurtles.Core.Helpers.QrCode;
+using NinjaTurtles.Core.Entities;
+using AutoMapper;
 
 namespace NinjaTurtles.Business.Concrete
 {
@@ -16,12 +18,14 @@ namespace NinjaTurtles.Business.Concrete
         private ICompanyOrderDal _companyOrder;
         private ICompanyOrderDetailDal _companyOrderDetail;
         private IQrCodeMainDal _qrCodeMainDal;
+        private IMapper _mapper;
 
-        public CompanyOrderManager(ICompanyOrderDal companyOrder, ICompanyOrderDetailDal companyOrderDetail, IQrCodeMainDal qrCodeMainDal)
+        public CompanyOrderManager(ICompanyOrderDal companyOrder, ICompanyOrderDetailDal companyOrderDetail, IQrCodeMainDal qrCodeMainDal, IMapper mapper)
         {
             _companyOrder = companyOrder;
             _companyOrderDetail = companyOrderDetail;
             _qrCodeMainDal = qrCodeMainDal;
+            _mapper = mapper;
         }
 
         public IResult Add(string name)
@@ -34,6 +38,14 @@ namespace NinjaTurtles.Business.Concrete
 
             _companyOrder.Add(company);
             return new Result(true, Messages.CustomerAdded);
+        }
+
+        public IDataResult<List<CompanyOrderResponseDto>> GetList()
+        {
+            var result = _companyOrder.GetList(x=> x.IsActive);
+            var companyOrderDto = _mapper.Map<List<CompanyOrderResponseDto>>(result);
+
+            return new SuccessDataResult<List<CompanyOrderResponseDto>>(companyOrderDto, Messages.CustomerGetList);
         }
 
         public IResult AddDetail(AddCompanyOrderDetailDto dto,string path)

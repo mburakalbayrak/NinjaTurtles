@@ -7,6 +7,7 @@ namespace NinjaTurtles.Business.Abstract
     {
         IResult Add(string name);
         IResult AddDetail(AddCompanyOrderDetailDto dto,string path);
+        IDataResult<List<CompanyOrderResponseDto>> GetList();
 
     }
 }

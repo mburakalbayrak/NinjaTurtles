@@ -34,6 +34,12 @@ namespace NinjaTurtles.Business.DependencyResolvers.Autofac
             builder.RegisterType<AuthManager>().As<IAuthService>();
             builder.RegisterType<JwtHelper>().As<ITokenHelper>();
 
+            builder.Register(ctx => new MapperConfiguration(cfg =>
+            {
+                // Profil sınıflarını buraya ekleyin
+                cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies());
+            }).CreateMapper()).As<IMapper>().InstancePerLifetimeScope();
+
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
             //builder.RegisterAssemblyTypes(assembly)

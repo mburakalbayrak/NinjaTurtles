@@ -37,7 +37,7 @@ namespace NinjaTurtles.Business.DependencyResolvers.Autofac
             builder.Register(ctx => new MapperConfiguration(cfg =>
             {
                 cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies());
-            }).CreateMapper()).As<IMapper>().InstancePerLifetimeScope();
+            }).CreateMapper()).As<IMapper>().SingleInstance();
 
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 

@@ -3,6 +3,7 @@
     public class QrCodeAnimalCreateDto
     {
         public Guid QrMainId { get; set; }
+        public int CustomerId { get; set; }
         public string OwnerName { get; set; } // Sahip Adı
         public string OwnerPhoneNumber { get; set; } // Sahip Telefon Numarası
         public string AnimalName { get; set; } // Hayvanın Adı

@@ -3,6 +3,7 @@
     public class QrCodeHumanCreateDto
     {
         public Guid QrMainId { get; set; }
+        public int CustomerId { get; set; }
         public string? FullName { get; set; } // Ad Soyad
         public DateTime? DateOfBirth { get; set; } // Doğum Tarihi
         public int? GenderId { get; set; } // Cinsiyet (Id)

@@ -21,7 +21,7 @@ namespace NinjaTurtles.WebApi.Controllers
         }
 
         [HttpGet("getList")]
-        [Authorize]
+        [Authorize(Roles = "Customer.List")]
         public IActionResult GetAll()
         {
             var result = _customerService.GetAll();

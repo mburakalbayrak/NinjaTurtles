@@ -109,6 +109,8 @@ var app = builder.Build();
 
 //app.UseCors(builder => builder.WithOrigins("http://localhost:44368").AllowAnyHeader());
 
+
+
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -131,6 +133,12 @@ app.Use(async (context, next) =>
     }
     await next.Invoke();
 });
+
+app.UseCors(_ => _
+.AllowAnyOrigin()
+.AllowAnyMethod()
+.AllowAnyHeader());
+
 
 // UseAuthentication üstte olmalý  UseAuthorization aþaðýda olmalý, UseAuthentication eve girmek için izindir, UseAuthorization evin içindeki mutfaða girmek için role gibi düþünebiliriz
 app.UseAuthentication();

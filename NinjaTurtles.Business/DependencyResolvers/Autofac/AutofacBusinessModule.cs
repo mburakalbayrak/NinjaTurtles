@@ -30,6 +30,7 @@ namespace NinjaTurtles.Business.DependencyResolvers.Autofac
             builder.RegisterType<CustomerManager>().As<ICustomerService>();
             builder.RegisterType<CompanyOrderManager>().As<ICompanyOrderService>();
             builder.RegisterType<ProductManager>().As<IProductService>();
+            builder.RegisterType<ParamManager>().As<IParamService>();
             builder.RegisterType<UserManager>().As<IUserService>();
             builder.RegisterType<AuthManager>().As<IAuthService>();
             builder.RegisterType<JwtHelper>().As<ITokenHelper>();

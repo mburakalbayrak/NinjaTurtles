@@ -5,7 +5,7 @@ namespace NinjaTurtles.Entities.Dtos
     public class QrCodeDetailDto
     {
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public bool? Empty { get; set; }
+        public bool Empty { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int? DetailTypeId { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
@@ -18,19 +18,19 @@ namespace NinjaTurtles.Entities.Dtos
     {
         public string? FullName { get; set; } // Ad Soyad
         public DateTime? DateOfBirth { get; set; } // Doğum Tarihi
-        public string? GenderId { get; set; } // Cinsiyet (Id)
+        public string? Gender { get; set; } // Cinsiyet (Id)
         public string? PhoneNumber { get; set; } // Telefon Numarası
         public string? EmailAddress { get; set; } // Mail Adresi
-        public string? MaritalStatusId { get; set; } // Medeni Durum (Id)
-        public string? EducationStatusId { get; set; } // Öğrenim Durumu (Id)
-        public string? CityOfResidenceId { get; set; } // Yaşadığı Şehir (Id)
-        public string? BloodTypeName { get; set; } // Kan Grubu (Id)
-        public string? ProfessionName { get; set; } // Meslek (Id)
+        public string? MaritalStatus { get; set; } // Medeni Durum (Id)
+        public string? EducationStatus { get; set; } // Öğrenim Durumu (Id)
+        public string? CityOfResidence { get; set; } // Yaşadığı Şehir (Id)
+        public string? BloodType { get; set; } // Kan Grubu (Id)
+        public string? Profession { get; set; } // Meslek (Id)
         public string? Allergies { get; set; } // Alerjiler
         public string? RegularMedications { get; set; } // Sürekli Kullanılan İlaçlar
         public string? MedicalHistory { get; set; } // Tıbbi Geçmiş
-        public string? PrimaryRelationName { get; set; } // 1. Yakınlık Durumu (Id)
-        public string? SecondaryRelationId { get; set; } // 2. Yakınlık Durumu (Id)
+        public string? PrimaryRelation { get; set; } // 1. Yakınlık Durumu (Id)
+        public string? SecondaryRelation { get; set; } // 2. Yakınlık Durumu (Id)
         public string? PrimaryContactFullName { get; set; } // 1. Yakınlık Ad Soyad
         public string? SecondaryContactFullName { get; set; } // 2. Yakınlık Ad Soyad
         public string? PrimaryContactPhone { get; set; } // 1. Yakın Telefon

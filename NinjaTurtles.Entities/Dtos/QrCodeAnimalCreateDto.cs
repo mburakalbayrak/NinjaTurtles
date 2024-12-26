@@ -7,7 +7,7 @@
         public string OwnerName { get; set; } // Sahip Adı
         public string OwnerPhoneNumber { get; set; } // Sahip Telefon Numarası
         public string AnimalName { get; set; } // Hayvanın Adı
-        public string? SpeciesId { get; set; } // Tür
+        public int? SpeciesId { get; set; } // Tür
         public string? BreedName { get; set; } // Cins
         public DateTime? DateOfBirth { get; set; } // Yaş
         public int? GenderId { get; set; } // Cinsiyet

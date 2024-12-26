@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts;
 
@@ -11,9 +12,11 @@ using NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts;
 namespace NinjaTurtles.DataAccess.Migrations
 {
     [DbContext(typeof(NinjaTurtlesContext))]
-    partial class NinjaTurtlesContextModelSnapshot : ModelSnapshot
+    [Migration("20241226201819_mig-11")]
+    partial class mig11
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -428,7 +431,7 @@ namespace NinjaTurtles.DataAccess.Migrations
                     b.Property<string>("RegularMedications")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("SpeciesId")
+                    b.Property<string>("SpeciesName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("VaccinationStatusId")

@@ -16,7 +16,6 @@ namespace NinjaTurtles.Core.Helpers.QrCode
             var qrCodeData = qrGenerator.CreateQrCode(content, QRCodeGenerator.ECCLevel.Q);
             var qrCode = new QRCode(qrCodeData);
             var qrCodeImage = qrCode.GetGraphic(20);
-
       
             qrCodeImage.Save(filePath, format);
 

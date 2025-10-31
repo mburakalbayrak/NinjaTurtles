@@ -43,7 +43,7 @@ namespace NinjaTurtles.WebApi.Controllers
         }
 
         [HttpPost("[action]")]
-        public IActionResult SendMailCode([FromBody] string email)
+        public IActionResult SendMailCode(string email)
         {
             var result = _customerService.SendMailCode(email);
             return Ok(result);

@@ -87,7 +87,7 @@ namespace NinjaTurtles.Business.Concrete
 
         public async Task<IResult> SendMailCode(string email)
         {
-            var customer = _customerDal.GetList(c => c.Email == email  && !c.IsDeleted && c.IsActive).LastOrDefault();
+            var customer = _customerDal.GetList(c => c.Email == email  && !c.IsDeleted).LastOrDefault();
             if (customer==null)
                 return new Result(false, Messages.UserNotFound);
             var code = Convert.ToInt32(ProExt.GenerateAccountNumber(null, "6"));

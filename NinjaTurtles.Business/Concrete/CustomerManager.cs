@@ -100,7 +100,7 @@ namespace NinjaTurtles.Business.Concrete
             _customerQrVerificationDal.Add(customerQr);
             MailWorker mail = new MailWorker();
 
-            mail.Init("mail.kurumsaleposta.com", 587, "dogrula@karekodla.com.tr", "5Z1Kp3o:Fc_kM=-6", false, true);
+            mail.Init("mail.kurumsaleposta.com", 587, "dogrula@karekodla.com.tr", "5Z1Kp3o:Fc_kM=-6", false, false);
 
             var mailBody = Messages.VerifyMailTemplate.Replace("{{code}}", code.ToString()).Replace("{{displayName}}", $"{customer.FirstName} {customer.LastName}").Replace("{{year}}", DateTime.Now.Year.ToString());
             var result = await mail.SendMailAsync(email, "dogrula@karekodla.com.tr", "Karekodla", mailBody, "Karekodla – Hesabını Doğrula", true);

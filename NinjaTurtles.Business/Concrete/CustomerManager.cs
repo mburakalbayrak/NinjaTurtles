@@ -54,7 +54,7 @@ namespace NinjaTurtles.Business.Concrete
                 mail.Init("mail.kurumsaleposta.com", 587, "dogrula@karekodla.com.tr", "5Z1Kp3o:Fc_kM=-6", true);
 
                 var message = Messages.VerifyMailTemplate.Replace("{{code}}", code.ToString()).Replace("{{displayName}}", $"{customerData.FirstName} {customerData.LastName}").Replace("{{year}}", DateTime.Now.Year.ToString());
-                var result = mail.SendMail(dto.EmailName, "dogrula@karekodla.com.tr", message, "Karekodla – Hesabını Doğrula", true);
+                var result = mail.SendMail(dto.Email, "dogrula@karekodla.com.tr", message, "Karekodla – Hesabını Doğrula", true);
                 return new Result(true, Messages.CustomerAdded);
             }
             catch (Exception ex)

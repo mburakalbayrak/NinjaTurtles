@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using NinjaTurtles.Business.Abstract;
 using NinjaTurtles.Business.Constants;
+using NinjaTurtles.Core.Entities;
 using NinjaTurtles.Core.Helpers;
 using NinjaTurtles.Core.Helpers.MailServices;
 using NinjaTurtles.Core.Utilities.Results;
@@ -32,18 +33,23 @@ namespace NinjaTurtles.Business.Concrete
         {
             try
             {
-                var customerData = _mapper.Map<Customer>(dto);
-                customerData.IsDeleted = false;
-                customerData.IsActive = false;
-                customerData.CreatedDate = DateTime.Now;
-
-                _customerDal.Add(customerData);
+                var returnMessage =Messages.HasCustomer;
+                var hasCustomer = _customerDal.GetList(c => (c.Email == dto.Email || c.PhoneNumber == dto.PhoneNumber) && !c.IsDeleted && c.IsActive).LastOrDefault();
+                if (hasCustomer == null)
+                {
+                    hasCustomer = _mapper.Map<Customer>(dto);
+                    hasCustomer.IsDeleted = false;
+                    hasCustomer.IsActive = false;
+                    hasCustomer.CreatedDate = DateTime.Now;
+                    _customerDal.Add(hasCustomer);
+                    returnMessage = Messages.CustomerAdded;
+                }
 
                 var code = Convert.ToInt32(ProExt.GenerateAccountNumber(null, "6"));
 
                 var customerQr = new CustomerQrVerification
                 {
-                    CustomerId = customerData.Id,
+                    CustomerId = hasCustomer.Id,
                     Code = code,
                     ExpireDate = DateTime.Now.AddMinutes(5),
                     CreatedDate = DateTime.Now,
@@ -52,11 +58,11 @@ namespace NinjaTurtles.Business.Concrete
                 _customerQrVerificationDal.Add(customerQr);
                 MailWorker mail = new MailWorker();
 
-                mail.Init("mail.kurumsaleposta.com",587, "dogrula@karekodla.com.tr", "5Z1Kp3o:Fc_kM=-6", false,false);
+                mail.Init("mail.kurumsaleposta.com", 587, "dogrula@karekodla.com.tr", "5Z1Kp3o:Fc_kM=-6", false, false);
 
-                var message = Messages.VerifyMailTemplate.Replace("{{code}}", code.ToString()).Replace("{{displayName}}", $"{customerData.FirstName} {customerData.LastName}").Replace("{{year}}", DateTime.Now.Year.ToString());
-                var result = await mail.SendMailAsync(dto.Email, "dogrula@karekodla.com.tr","Karekodla", message, "Karekodla – Hesabını Doğrula", true);
-                return new Result(true, Messages.CustomerAdded);
+                var mailBody = Messages.VerifyMailTemplate.Replace("{{code}}", code.ToString()).Replace("{{displayName}}", $"{hasCustomer.FirstName} {hasCustomer.LastName}").Replace("{{year}}", DateTime.Now.Year.ToString());
+                var result = await mail.SendMailAsync(dto.Email, "dogrula@karekodla.com.tr", "Karekodla", mailBody, "Karekodla – Hesabını Doğrula", true);
+                return new Result(true, returnMessage);
             }
             catch (Exception ex)
             {
@@ -77,6 +83,30 @@ namespace NinjaTurtles.Business.Concrete
         {
             var customerList = _customerDal.GetList(c => c.IsActive && !c.IsDeleted);
             return new SuccessDataResult<List<Customer>>(customerList, Messages.CustomerGetList);
+        }
+
+        public async Task<IResult> SendMailCode(string email)
+        {
+            var customer = _customerDal.GetList(c => c.Email == email  && !c.IsDeleted && c.IsActive).LastOrDefault();
+            if (customer==null)
+                return new Result(false, Messages.UserNotFound);
+            var code = Convert.ToInt32(ProExt.GenerateAccountNumber(null, "6"));
+            var customerQr = new CustomerQrVerification
+            {
+                CustomerId = customer.Id,
+                Code = code,
+                ExpireDate = DateTime.Now.AddMinutes(5),
+                CreatedDate = DateTime.Now,
+                VerificationTypeId = 1,
+            };
+            _customerQrVerificationDal.Add(customerQr);
+            MailWorker mail = new MailWorker();
+
+            mail.Init("mail.kurumsaleposta.com", 587, "dogrula@karekodla.com.tr", "5Z1Kp3o:Fc_kM=-6", false, false);
+
+            var mailBody = Messages.VerifyMailTemplate.Replace("{{code}}", code.ToString()).Replace("{{displayName}}", $"{customer.FirstName} {customer.LastName}").Replace("{{year}}", DateTime.Now.Year.ToString());
+            var result = await mail.SendMailAsync(email, "dogrula@karekodla.com.tr", "Karekodla", mailBody, "Karekodla – Hesabını Doğrula", true);
+            return new Result(true, Messages.SendMailCode);
         }
 
         public IDataResult<int> VerifyCustomer(VerifyCustomerEmailDto dto)

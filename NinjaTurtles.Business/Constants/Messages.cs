@@ -13,9 +13,11 @@ namespace NinjaTurtles.Business.Constants
         public static string ProductUpdated = "Ürün başarıyla güncellendi";
 
         public static string CustomerAdded = "Hesabınız başarıyla oluşturulmuştur, lütfen e-postanıza gelen kod ile hesabızı doğrulayın.";
+        public static string HasCustomer= "Hesabınız zaten mevcut, lütfen e-postanıza gelen kodu doğrulayarak aksesuarınızı tanımlamaya devam edin.";
+        public static string SendMailCode= "lütfen e-postanıza gelen kodu doğrulayarak aksesuarınızı tanımlamaya devam edin.";
         public static string CustomerDeleted = "Hesabınız silinmiştir.";
         public static string CustomerGetList = "Customerlar getirilmiştir.";
-        public static string CompanyOrderAdded = "Firma başarıyla eklendi";
+        public static string CompanyAdded = "Firma başarıyla eklendi";
         public static string CompanyOrderDetailAdded = "Sipariş başarıyla oluşturuldu";
         public static string QrFilled = "Bilgileriniz karekodunuza başarıyla eşleştirilmilştir.";
         public static string EmptyQr = "Bilgilerinizi doldurduktan sonra aksesuarınızı kullanmaya başlayabilirsiniz.";
@@ -122,9 +124,6 @@ namespace NinjaTurtles.Business.Constants
 
       <p class=""muted"">Kod <strong>5 dakika</strong> içinde kullanılmazsa geçersiz olacaktır.</p>
 
-      <div class=""cta"">
-        <a class=""btn"" href=""{{verifyUrl}}"" target=""_blank"" rel=""noopener"">Kodu Kullan ve Doğrula</a>
-      </div>
 
       <div class=""note"">
         <strong>Güvenlik notu:</strong> Kodu kimseyle paylaşma ve sadece

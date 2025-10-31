@@ -42,6 +42,13 @@ namespace NinjaTurtles.WebApi.Controllers
             return Ok(result);
         }
 
+        [HttpPost("[action]")]
+        public IActionResult SendMailCode([FromBody] string email)
+        {
+            var result = _customerService.SendMailCode(email);
+            return Ok(result);
+        }
+
         [HttpDelete("[action]")]
         public IActionResult Delete(int id)
         {

@@ -36,7 +36,7 @@ namespace NinjaTurtles.Business.Concrete
             company.IsActive = true;
 
             _companyOrder.Add(company);
-            return new Result(true, Messages.CustomerAdded);
+            return new Result(true, Messages.CompanyAdded);
         }
 
         public IDataResult<List<CompanyOrderResponseDto>> GetList()

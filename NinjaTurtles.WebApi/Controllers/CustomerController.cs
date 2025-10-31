@@ -6,6 +6,7 @@ using NinjaTurtles.Core.NetCoreConfiguration;
 using NinjaTurtles.Entities.Config;
 using NinjaTurtles.Entities.Dtos;
 using System.Drawing.Imaging;
+using System.Threading.Tasks;
 
 namespace NinjaTurtles.WebApi.Controllers
 {
@@ -42,10 +43,10 @@ namespace NinjaTurtles.WebApi.Controllers
             return Ok(result);
         }
 
-        [HttpPost("[action]")]
-        public IActionResult SendMailCode(string email)
+        [HttpGet("[action]")]
+        public async Task<IActionResult> SendMailCode(string email)
         {
-            var result = _customerService.SendMailCode(email);
+            var result = await _customerService.SendMailCode(email);
             return Ok(result);
         }
 

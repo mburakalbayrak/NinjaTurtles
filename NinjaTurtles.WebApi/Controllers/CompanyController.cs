@@ -1,10 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NinjaTurtles.Business.Abstract;
-using NinjaTurtles.Core.Helpers.QrCode;
-using NinjaTurtles.Core.NetCoreConfiguration;
-using NinjaTurtles.Entities.Config;
 using NinjaTurtles.Entities.Dtos;
-using System.Drawing.Imaging;
 
 namespace NinjaTurtles.WebApi.Controllers
 {
@@ -12,24 +8,24 @@ namespace NinjaTurtles.WebApi.Controllers
     [ApiController]
     public class CompanyController : Controller
     {
-        private ICompanyOrderService _companyOrderService;
+        private ICompanyService _companyService;
 
-        public CompanyController(ICompanyOrderService companyOrderService)
+        public CompanyController(ICompanyService companyOrderService)
         {
-            _companyOrderService = companyOrderService;
+            _companyService = companyOrderService;
         }
 
         [HttpGet("getList")]
         public IActionResult GetList()
         {
-            var result = _companyOrderService.GetList();
+            var result = _companyService.GetList();
             return Ok(result);
         }
 
         [HttpPost("[action]")]
         public IActionResult Add([FromBody] string name)
         {
-            var result =_companyOrderService.Add(name);
+            var result =_companyService.Add(name);
             return Ok(result);
         }
 
@@ -37,7 +33,7 @@ namespace NinjaTurtles.WebApi.Controllers
         public IActionResult AddCompanyOrder([FromBody] AddCompanyOrderDetailDto dto)
         {
             var currentdirectory = Directory.GetCurrentDirectory();
-            var result = _companyOrderService.AddDetail(dto,currentdirectory);
+            var result = _companyService.AddDetail(dto,currentdirectory);
             return Ok(result);
         }
 

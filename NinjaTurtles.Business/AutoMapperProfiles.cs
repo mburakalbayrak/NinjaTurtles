@@ -13,7 +13,7 @@ namespace NinjaTurtles.Business
             CreateMap<QrCodeAnimalDetail, QrCodeAnimalDetailDto>().ReverseMap();
             CreateMap<QrCodeAnimalCreateDto, QrCodeAnimalDetail>().ReverseMap();
             CreateMap<QrCodeHumanCreateDto, QrCodeHumanDetail>().ReverseMap();
-            CreateMap<CompanyOrderResponseDto, CompanyOrder>().ReverseMap();
+            CreateMap<CompanyOrderResponseDto, Company>().ReverseMap();
 
 
         }

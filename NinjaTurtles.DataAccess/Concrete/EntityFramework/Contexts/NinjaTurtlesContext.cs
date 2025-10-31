@@ -64,7 +64,7 @@ namespace NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts
                 .Property(p => p.Id)
                 .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
 
-            modelBuilder.Entity<CompanyOrder>()
+            modelBuilder.Entity<Company>()
                 .Property(p => p.Id)
                 .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
 
@@ -95,7 +95,7 @@ namespace NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts
         public DbSet<ParamItem> ParamItem { get; set; }
         public DbSet<QrCodeHumanDetail> QrCodeHumanDetail { get; set; }
         public DbSet<QrCodeAnimalDetail> QrCodeAnimalDetail { get; set; }
-        public DbSet<CompanyOrder> CompanyOrder { get; set; }
+        public DbSet<Company> Company{ get; set; }
         public DbSet<CompanyOrderDetail> CompanyOrderDetail { get; set; }
         public DbSet<User> User { get; set; }
         public DbSet<OperationClaim> OperationClaim { get; set; }

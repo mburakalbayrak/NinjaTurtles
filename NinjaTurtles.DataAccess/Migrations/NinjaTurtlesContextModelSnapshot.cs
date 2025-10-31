@@ -112,7 +112,7 @@ namespace NinjaTurtles.DataAccess.Migrations
                     b.ToTable("UserOperationClaim");
                 });
 
-            modelBuilder.Entity("NinjaTurtles.Entities.Concrete.CompanyOrder", b =>
+            modelBuilder.Entity("NinjaTurtles.Entities.Concrete.Company", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -141,7 +141,7 @@ namespace NinjaTurtles.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CompanyOrder");
+                    b.ToTable("Company");
                 });
 
             modelBuilder.Entity("NinjaTurtles.Entities.Concrete.CompanyOrderDetail", b =>
@@ -243,10 +243,7 @@ namespace NinjaTurtles.DataAccess.Migrations
                     b.Property<int>("Code")
                         .HasColumnType("int");
 
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
+                    b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("CustomerId")
@@ -255,23 +252,11 @@ namespace NinjaTurtles.DataAccess.Migrations
                     b.Property<DateTime?>("ExpireDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("ModifiedBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("QrCodeMainId")
-                        .HasColumnType("int");
-
                     b.Property<int>("VerificationTypeId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("VerifyDate")
-                        .HasColumnType("bit");
+                    b.Property<DateTime?>("VerifyDate")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 

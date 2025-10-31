@@ -18,7 +18,7 @@ namespace NinjaTurtles.Business.DependencyResolvers.Autofac
             builder.RegisterType<EfCustomerDal>().As<ICustomerDal>();
             builder.RegisterType<EfCustomerQrVerificationDal>().As<ICustomerQrVerificationDal>();
             builder.RegisterType<EfParamItemDal>().As<IParamItemDal>();
-            builder.RegisterType<EfCompanyOrderDal>().As<ICompanyOrderDal>();
+            builder.RegisterType<EfCompanyDal>().As<ICompanyDal>();
             builder.RegisterType<EfCompanyOrderDetailDal>().As<ICompanyOrderDetailDal>();
             builder.RegisterType<EfQrCodeMainDal>().As<IQrCodeMainDal>();
             builder.RegisterType<EfQrCodeHumanDetailDal>().As<IQrCodeHumanDetailDal>();
@@ -28,7 +28,7 @@ namespace NinjaTurtles.Business.DependencyResolvers.Autofac
 
             builder.RegisterType<QrManager>().As<IQrService>();
             builder.RegisterType<CustomerManager>().As<ICustomerService>();
-            builder.RegisterType<CompanyOrderManager>().As<ICompanyOrderService>();
+            builder.RegisterType<CompanyManager>().As<ICompanyService>();
             builder.RegisterType<ProductManager>().As<IProductService>();
             builder.RegisterType<ParamManager>().As<IParamService>();
             builder.RegisterType<UserManager>().As<IUserService>();

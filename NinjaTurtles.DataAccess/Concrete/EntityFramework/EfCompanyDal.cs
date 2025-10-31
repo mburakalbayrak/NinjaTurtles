@@ -5,7 +5,7 @@ using NinjaTurtles.Entities.Concrete;
 
 namespace NinjaTurtles.DataAccess.Concrete.EntityFramework
 {
-    public class EfCompanyOrderDal : EfEntityRepositoryBase<CompanyOrder, NinjaTurtlesContext>, ICompanyOrderDal
+    public class EfCompanyDal : EfEntityRepositoryBase<Company, NinjaTurtlesContext>, ICompanyDal
     {
 
     }

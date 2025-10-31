@@ -13,14 +13,14 @@ using AutoMapper;
 
 namespace NinjaTurtles.Business.Concrete
 {
-    public class CompanyOrderManager : ICompanyOrderService
+    public class CompanyManager : ICompanyService
     {
-        private ICompanyOrderDal _companyOrder;
+        private ICompanyDal _companyOrder;
         private ICompanyOrderDetailDal _companyOrderDetail;
         private IQrCodeMainDal _qrCodeMainDal;
         private IMapper _mapper;
 
-        public CompanyOrderManager(ICompanyOrderDal companyOrder, ICompanyOrderDetailDal companyOrderDetail, IQrCodeMainDal qrCodeMainDal, IMapper mapper)
+        public CompanyManager(ICompanyDal companyOrder, ICompanyOrderDetailDal companyOrderDetail, IQrCodeMainDal qrCodeMainDal, IMapper mapper)
         {
             _companyOrder = companyOrder;
             _companyOrderDetail = companyOrderDetail;
@@ -30,10 +30,9 @@ namespace NinjaTurtles.Business.Concrete
 
         public IResult Add(string name)
         {
-            var company = new CompanyOrder();
+            var company = new Company();
             company.Name = name;
             company.CreatedDate = DateTime.Now;
-            company.CreatedBy = 1;
             company.IsActive = true;
 
             _companyOrder.Add(company);
@@ -58,7 +57,6 @@ namespace NinjaTurtles.Business.Concrete
                 cod.Quantity = dto.Quantity;
                 cod.LicenceUnitPrice = dto.LicenceUnitPrice;
                 cod.CreatedDate = DateTime.Now;
-                cod.CreatedBy = 1;
                 cod.IsActive = true;
                 _companyOrderDetail.Add(cod);
 
@@ -81,7 +79,6 @@ namespace NinjaTurtles.Business.Concrete
                     qrcodeMain.ImageUrl = filePath;
                     qrcodeMain.RedirectUrl = url;
                     qrcodeMain.CreatedDate = DateTime.Now;
-                    qrcodeMain.CreatedBy = 1;
                     qrcodeMain.IsActive = true;
                     _qrCodeMainDal.Add(qrcodeMain);
                 }

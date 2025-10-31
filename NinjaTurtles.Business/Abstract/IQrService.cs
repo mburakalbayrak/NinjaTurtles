@@ -8,5 +8,11 @@ namespace NinjaTurtles.Business.Abstract
         IDataResult<QrCodeDetailDto> GetQrDetail(Guid id);
         IResult CreateHumanDetail(QrCodeHumanCreateDto dto);
         IResult CreateAnimalDetail(QrCodeAnimalCreateDto dto);
+
+        IDataResult<QrCodeHumanDetailDto> GetHumanDetailVerify(QrUpdateVerifyDto dto);
+        IResult UpdateHumanDetail(QrCodeHumanUpdateDto dto);
+        IDataResult<QrCodeAnimalDetailDto> GetAnimalDetailVerify(QrUpdateVerifyDto dto);
+
+        IResult UpdateAnimalDetail(QrCodeAnimalUpdateDto dto);
     }
 }

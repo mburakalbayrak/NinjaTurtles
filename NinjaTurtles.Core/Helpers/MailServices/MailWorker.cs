@@ -174,8 +174,16 @@ namespace NinjaTurtles.Core.Helpers.MailServices
             message.BodyEncoding = Encoding.UTF8;
             message.HeadersEncoding = Encoding.UTF8;
 
-            await client.SendMailAsync(message);
-            return true;
+            try
+            {
+
+                await client.SendMailAsync(message);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
 
         }
 
@@ -220,8 +228,16 @@ namespace NinjaTurtles.Core.Helpers.MailServices
             message.BodyEncoding = Encoding.UTF8;
             message.HeadersEncoding = Encoding.UTF8;
 
-            await client.SendMailAsync(message);
-            return true;
+            try
+            {
+                await client.SendMailAsync(message);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
 
         }
 

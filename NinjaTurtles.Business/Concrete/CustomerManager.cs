@@ -17,14 +17,12 @@ namespace NinjaTurtles.Business.Concrete
     public class CustomerManager : ICustomerService
     {
         private ICustomerDal _customerDal;
-        private IQrCodeMainDal _qrCodeMainDal;
         private ICustomerQrVerificationDal _customerQrVerificationDal;
         private IMapper _mapper;
 
-        public CustomerManager(ICustomerDal customerDal, IQrCodeMainDal qrCodeMainDal, ICustomerQrVerificationDal customerQrVerificationDal, IMapper mapper)
+        public CustomerManager(ICustomerDal customerDal, ICustomerQrVerificationDal customerQrVerificationDal, IMapper mapper)
         {
             _customerDal = customerDal;
-            _qrCodeMainDal = qrCodeMainDal;
             _customerQrVerificationDal = customerQrVerificationDal;
             _mapper = mapper;
         }
@@ -102,7 +100,7 @@ namespace NinjaTurtles.Business.Concrete
             _customerQrVerificationDal.Add(customerQr);
             MailWorker mail = new MailWorker();
 
-            mail.Init("mail.kurumsaleposta.com", 587, "dogrula@karekodla.com.tr", "5Z1Kp3o:Fc_kM=-6", false, false);
+            mail.Init("mail.kurumsaleposta.com", 587, "dogrula@karekodla.com.tr", "5Z1Kp3o:Fc_kM=-6", false, true);
 
             var mailBody = Messages.VerifyMailTemplate.Replace("{{code}}", code.ToString()).Replace("{{displayName}}", $"{customer.FirstName} {customer.LastName}").Replace("{{year}}", DateTime.Now.Year.ToString());
             var result = await mail.SendMailAsync(email, "dogrula@karekodla.com.tr", "Karekodla", mailBody, "Karekodla – Hesabını Doğrula", true);

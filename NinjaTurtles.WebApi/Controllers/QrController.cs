@@ -39,10 +39,37 @@ namespace NinjaTurtles.WebApi.Controllers
         }
 
         [HttpGet("[action]")]
-        public IActionResult GetCurrentDirectory()
+        public IActionResult GetHumanDetailVerify(QrUpdateVerifyDto dto)
         {
-            var currentdirectory = Directory.GetCurrentDirectory();
-            return Ok(currentdirectory);
+            var qr = _qrService.GetHumanDetailVerify(dto);
+            return Ok(qr);
         }
+
+        [HttpGet("[action]")]
+        public IActionResult GetAnimalDetailVerify(QrUpdateVerifyDto dto)
+        {
+            var qr = _qrService.GetAnimalDetailVerify(dto);
+            return Ok(qr);
+        }
+        [HttpPost("[action]")]
+        public IActionResult UpdateHumanDetail([FromBody] QrCodeHumanUpdateDto dto)
+        {
+            var result = _qrService.UpdateHumanDetail(dto);
+            return Ok(result);
+        }
+
+        [HttpPost("[action]")]
+        public IActionResult UpdateAnimalDetail([FromBody] QrCodeAnimalUpdateDto dto)
+        {
+            var result = _qrService.UpdateAnimalDetail(dto);
+            return Ok(result);
+        }
+
+        //[HttpGet("[action]")]
+        //public IActionResult GetCurrentDirectory()
+        //{
+        //    var currentdirectory = Directory.GetCurrentDirectory();
+        //    return Ok(currentdirectory);
+        //}
     }
 }

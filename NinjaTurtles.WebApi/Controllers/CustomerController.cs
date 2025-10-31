@@ -35,6 +35,13 @@ namespace NinjaTurtles.WebApi.Controllers
             return Ok(result);
         }
 
+        [HttpPost("[action]")]
+        public IActionResult VerifyCustomer([FromBody] VerifyCustomerEmailDto dto)
+        {
+            var result = _customerService.VerifyCustomer(dto);
+            return Ok(result);
+        }
+
         [HttpDelete("[action]")]
         public IActionResult Delete(int id)
         {

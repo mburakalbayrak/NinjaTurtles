@@ -6,7 +6,7 @@ namespace NinjaTurtles.Business.Abstract
 {
     public interface ICustomerService
     {
-        IResult Add(AddCustomerDto dto);
+        Task<IResult> Add(AddCustomerDto dto);
         IDataResult<int> VerifyCustomer(VerifyCustomerEmailDto dto);
         IResult Delete(int id);
         IDataResult<List<Customer>> GetAll();

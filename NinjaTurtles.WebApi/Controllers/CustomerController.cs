@@ -29,9 +29,9 @@ namespace NinjaTurtles.WebApi.Controllers
         }
 
         [HttpPost("[action]")]
-        public IActionResult Add([FromBody] AddCustomerDto dto)
+        public async Task<IActionResult> Add([FromBody] AddCustomerDto dto)
         {
-            var result =_customerService.Add(dto);
+            var result = await _customerService.Add(dto);
             return Ok(result);
         }
 

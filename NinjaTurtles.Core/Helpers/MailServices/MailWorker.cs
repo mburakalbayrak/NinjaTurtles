@@ -2,12 +2,14 @@
 using System.Net.Mail;
 using System.Net;
 using System.Threading;
+using System.Text;
 
 
 namespace NinjaTurtles.Core.Helpers.MailServices
 {
     public class MailWorker
     {
+
         #region Fields
 
         bool isInitialized = false;
@@ -18,24 +20,55 @@ namespace NinjaTurtles.Core.Helpers.MailServices
 
         #region Methods
 
-        public void Init(string host, int port, string userName, string password, bool enableSsl)
+
+        public void Init(string host, int port, string userName, string password, bool enableSsl, bool useDefaultCredentials)
         {
             try
             {
-                credential = new NetworkCredential();
-                credential.UserName = userName;
-                credential.Password = password;
-                client = new SmtpClient(host);
-                client.EnableSsl = enableSsl;
-                client.Credentials = credential;
-                System.Net.ServicePointManager.ServerCertificateValidationCallback = delegate (object s, System.Security.Cryptography.X509Certificates.X509Certificate certificate, System.Security.Cryptography.X509Certificates.X509Chain chain, System.Net.Security.SslPolicyErrors sslPolicyErrors) { return true; };
+                // İSTENMEZ ama iç ağ/test için gerekiyorsa bırakılabilir:
+                // ServicePointManager.ServerCertificateValidationCallback = (s, cert, chain, errors) => true;
 
-                client.Port = port;
+                client = new SmtpClient(host)
+                {
+                    Port = port,
+                    EnableSsl = enableSsl,
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    Timeout = 100000
+                };
+
+                client.UseDefaultCredentials = useDefaultCredentials;
+
+                if (useDefaultCredentials)
+                {
+                    // On-prem Exchange (NTLM) senaryosu: makine/oturum hesabı ile auth
+                    client.Credentials = CredentialCache.DefaultNetworkCredentials;
+                }
+                else
+                {
+                    // Exchange Online vb: kullanıcı adı/şifre ile auth
+                    // DOMAIN\user gelirse domain'i ayır
+                    string domain = null, user = userName;
+                    int slash = userName.IndexOf('\\');
+                    if (slash >= 0)
+                    {
+                        domain = userName.Substring(0, slash);
+                        user = userName[(slash + 1)..];
+                    }
+
+
+                    credential = domain is null
+                        ? new NetworkCredential(user, password)
+                        : new NetworkCredential(user, password, domain);
+
+                    client.Credentials = credential;
+                }
+
                 isInitialized = true;
             }
             catch
             {
                 isInitialized = false;
+                throw; // en azından loglaman iyi olur
             }
         }
 
@@ -106,59 +139,90 @@ namespace NinjaTurtles.Core.Helpers.MailServices
             }
         }
 
-        public bool SendMail(string receiver, string sender, string mailContent, string subject, bool isBodyHtml)
+        public async Task<bool> SendMailAsync(
+      string receiver,
+      string sender,
+      string displayName,
+      string mailContent,
+      string subject,
+      bool isBodyHtml)
         {
-            if (isInitialized)
+            if (!isInitialized) return false;
+
+            using var message = new MailMessage();
+
+            // Exchange Online gibi senaryolarda From == kimlik doğrulanan mailbox olmalı (SendAs yoksa)
+            if (!client.UseDefaultCredentials && client.Credentials is NetworkCredential nc && !string.IsNullOrWhiteSpace(nc.UserName))
             {
-                MailMessage mm = new MailMessage();
-                mm.From = new MailAddress(sender);
-                mm.To.Add(new MailAddress(receiver));
-                mm.Subject = subject;
-                mm.Body = mailContent;
-                mm.IsBodyHtml = isBodyHtml;
-
-                Thread threadSendMails;
-                threadSendMails = new Thread(delegate ()
-                {
-                    SendMail(mm);
-                });
-                threadSendMails.IsBackground = true;
-                threadSendMails.Start();
-
-                return true;
+                // nc.UserName çoğunlukla UPN/e-posta olmalı (user@domain)
+                var fromAddress = nc.UserName.Contains('@') ? nc.UserName : sender?.Trim();
+                message.From = new MailAddress(fromAddress, displayName);
             }
             else
             {
-                return false;
+                // NTLM/DefaultCredentials ile genelde From'u istediğin gibi verebilirsin (yine de SendAs gerekebilir)
+                message.From = new MailAddress(sender.Trim(), displayName);
             }
+
+            foreach (var address in receiver.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                message.To.Add(address);
+
+            message.Subject = subject;
+            message.Body = mailContent;
+            message.IsBodyHtml = isBodyHtml;
+            message.SubjectEncoding = Encoding.UTF8;
+            message.BodyEncoding = Encoding.UTF8;
+            message.HeadersEncoding = Encoding.UTF8;
+
+            await client.SendMailAsync(message);
+            return true;
+
         }
 
-        public bool SendMail(string receiver, string sender, string mailContent, string subject, bool isBodyHtml, Attachment attachment)
+        public async Task<bool> SendMailAsync(
+      string receiver,
+      string sender,
+      string displayName,
+      string mailContent,
+      string subject,
+      bool isBodyHtml,
+      Attachment attachment)
         {
-            if (isInitialized)
+            if (!isInitialized) return false;
+
+            using var message = new MailMessage();
+
+            // Exchange Online gibi senaryolarda From == kimlik doğrulanan mailbox olmalı (SendAs yoksa)
+            if (!client.UseDefaultCredentials && client.Credentials is NetworkCredential nc && !string.IsNullOrWhiteSpace(nc.UserName))
             {
-                MailMessage mm = new MailMessage();
-                mm.From = new MailAddress(sender);
-                mm.To.Add(new MailAddress(receiver));
-                mm.Attachments.Add(attachment);
-                mm.Subject = subject;
-                mm.Body = mailContent;
-                mm.IsBodyHtml = isBodyHtml;
-
-                Thread threadSendMails;
-                threadSendMails = new Thread(delegate ()
-                {
-                    SendMail(mm);
-                });
-                threadSendMails.IsBackground = true;
-                threadSendMails.Start();
-
-                return true;
+                // nc.UserName çoğunlukla UPN/e-posta olmalı (user@domain)
+                var fromAddress = nc.UserName.Contains('@') ? nc.UserName : sender?.Trim();
+                message.From = new MailAddress(fromAddress, displayName);
             }
             else
             {
-                return false;
+                // NTLM/DefaultCredentials ile genelde From'u istediğin gibi verebilirsin (yine de SendAs gerekebilir)
+                message.From = new MailAddress(sender.Trim(), displayName);
             }
+
+            foreach (var address in receiver.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                message.To.Add(address);
+
+
+            if (attachment != null)
+                message.Attachments.Add(attachment);
+
+            message.Bcc.Add("yusuf.celik@seachglobal.com");
+            message.Subject = subject;
+            message.Body = mailContent;
+            message.IsBodyHtml = isBodyHtml;
+            message.SubjectEncoding = Encoding.UTF8;
+            message.BodyEncoding = Encoding.UTF8;
+            message.HeadersEncoding = Encoding.UTF8;
+
+            await client.SendMailAsync(message);
+            return true;
+
         }
 
         private void SendMail(MailMessage mail)

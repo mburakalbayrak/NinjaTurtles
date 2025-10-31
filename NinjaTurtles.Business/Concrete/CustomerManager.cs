@@ -8,6 +8,7 @@ using NinjaTurtles.DataAccess.Abstract;
 using NinjaTurtles.Entities.Concrete;
 using NinjaTurtles.Entities.Dtos;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace NinjaTurtles.Business.Concrete
@@ -27,7 +28,7 @@ namespace NinjaTurtles.Business.Concrete
             _mapper = mapper;
         }
 
-        public IResult Add(AddCustomerDto dto)
+        public async Task<IResult> Add(AddCustomerDto dto)
         {
             try
             {
@@ -51,10 +52,10 @@ namespace NinjaTurtles.Business.Concrete
                 _customerQrVerificationDal.Add(customerQr);
                 MailWorker mail = new MailWorker();
 
-                mail.Init("mail.kurumsaleposta.com", 587, "dogrula@karekodla.com.tr", "5Z1Kp3o:Fc_kM=-6", true);
+                mail.Init("mail.kurumsaleposta.com",587, "dogrula@karekodla.com.tr", "5Z1Kp3o:Fc_kM=-6", false,false);
 
                 var message = Messages.VerifyMailTemplate.Replace("{{code}}", code.ToString()).Replace("{{displayName}}", $"{customerData.FirstName} {customerData.LastName}").Replace("{{year}}", DateTime.Now.Year.ToString());
-                var result = mail.SendMail(dto.Email, "dogrula@karekodla.com.tr", message, "Karekodla – Hesabını Doğrula", true);
+                var result = await mail.SendMailAsync(dto.Email, "dogrula@karekodla.com.tr","Karekodla", message, "Karekodla – Hesabını Doğrula", true);
                 return new Result(true, Messages.CustomerAdded);
             }
             catch (Exception ex)
@@ -80,7 +81,7 @@ namespace NinjaTurtles.Business.Concrete
 
         public IDataResult<int> VerifyCustomer(VerifyCustomerEmailDto dto)
         {
-            var customer = _customerDal.Get(c => c.Email == dto.Email && !c.IsDeleted);
+            var customer = _customerDal.GetList(c => c.Email == dto.Email && !c.IsDeleted).LastOrDefault();
             if (customer == null)
                 return new ErrorDataResult<int>(message: Messages.UserNotFound);
 

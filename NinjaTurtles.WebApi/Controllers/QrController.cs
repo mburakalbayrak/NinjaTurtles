@@ -25,15 +25,6 @@ namespace NinjaTurtles.WebApi.Controllers
 
 
         [HttpPost("[action]")]
-        public IActionResult MailTest()
-        {
-            MailWorker mail= new MailWorker();
-            mail.Init("mail.kurumsaleposta.com",587, "dogrula@karekodla.com.tr", "5Z1Kp3o:Fc_kM=-6",true);
-          var result=  mail.SendMail("yusuf.celik@karekodla.com.tr", "dogrula@karekodla.com.tr", "345631", "Hesap Doğrulama", true);
-            return Ok(result);
-        }
-
-        [HttpPost("[action]")]
         public IActionResult CreateHumanDetail([FromBody] QrCodeHumanCreateDto dto)
         {
             var result = _qrService.CreateHumanDetail(dto);

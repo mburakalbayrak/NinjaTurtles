@@ -17,7 +17,7 @@ namespace NinjaTurtles.Core.Helpers.QrCodeGeneratator
             string savePath,
             LabelPosition position = LabelPosition.Bottom,
             int pixelsPerModule = 20,
-            int margin = 20,
+            int margin = 10,
             string? fontFilePath = null,
             float initialFontSize = 24f,
             float minFontSize = 10f)

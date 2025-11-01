@@ -67,7 +67,6 @@ namespace NinjaTurtles.Business.Concrete
                 var company = _company.Get(c => c.Id == cod.CompanyOrderId);
 
                 var companyOrderCount = _companyOrderDetail.GetList(c => c.CompanyOrderId == cod.CompanyOrderId && c.IsActive).Count();
-
                 string directory = _config.GetSection("Directories:FileDirectory").Value;
                 var basedirectory = $"{directory}/QrCode/{company.Name}/{cod.Id}";
                 DirectoryInfo di = Directory.CreateDirectory(basedirectory);

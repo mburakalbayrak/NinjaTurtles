@@ -1,19 +1,13 @@
 ﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.Configuration;
 using NinjaTurtles.Business.Abstract;
 using NinjaTurtles.Business.Constants;
 using NinjaTurtles.Core.DataAccess.Concrete.Dto;
-using NinjaTurtles.Core.Entities;
-using NinjaTurtles.Core.Entities.Enums;
 using NinjaTurtles.Core.Helpers.FileUpload;
 using NinjaTurtles.Core.Utilities.Results;
 using NinjaTurtles.DataAccess.Abstract;
-using NinjaTurtles.DataAccess.Concrete.EntityFramework;
 using NinjaTurtles.Entities.Concrete;
 using NinjaTurtles.Entities.Dtos;
-using System.IO;
-using static QRCoder.PayloadGenerator;
 
 namespace NinjaTurtles.Business.Concrete
 {
@@ -71,7 +65,7 @@ namespace NinjaTurtles.Business.Concrete
                     //var currentdirectory = @"D:\vhosts\karekodla.com\UploadFiles\ProfilePictures\";
                     string directory = _config.GetSection("Directories:FileDirectory").Value;
 
-                    string path = System.IO.Path.Combine(_config.GetSection("Directories:FileRootUpload").Value, "ProfilePictures");
+                    string path = System.IO.Path.Combine(directory, "ProfilePictures");
                     CreateFileWithFileNameDto uploadFile = new CreateFileWithFileNameDto()
                     {
                         File = dto.File,
@@ -165,7 +159,8 @@ namespace NinjaTurtles.Business.Concrete
                     var qrHuman = _qrCodeHumanDetailDal.Get(c => c.QrMainId == qr.Id);
                     qrDto.HumanDetail = _mapper.Map<QrCodeHumanDetailDto>(qrHuman);
 
-                    string directory = _config.GetSection("Directories:FileRootUpload").Value;
+                    string directory = _config.GetSection("Directories:FileDirectory").Value;
+
                     string filePath = Path.Combine(directory, "ProfilePictures", qrHuman.ProfilePictureUrl);
                     FileInfo fileInfo = new FileInfo(filePath);
                     var bytes = File.ReadAllBytes(filePath);

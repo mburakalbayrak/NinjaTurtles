@@ -31,10 +31,17 @@ namespace NinjaTurtles.WebApi.Controllers
         }
 
         [HttpPost("[action]")]
+        public IActionResult Update([FromBody] UpdateCompanyDto dto)
+        {
+            var result = _companyService.Update(dto);
+            return Ok(result);
+        }
+
+        [HttpPost("[action]")]
         public async Task<IActionResult> AddCompanyOrder([FromBody] AddCompanyOrderDetailDto dto)
         {
-            var currentdirectory = @"D:\vhosts\karekodla.com\";
-            var result = await _companyService.AddDetail(dto, currentdirectory);
+          
+            var result = await _companyService.AddDetail(dto);
             return Ok(result);
         }
 

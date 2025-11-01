@@ -6,7 +6,8 @@ namespace NinjaTurtles.Business.Abstract
     public interface ICompanyService
     {
         IResult Add(AddCompanyDto dto);
-        Task<IResult> AddDetail(AddCompanyOrderDetailDto dto,string path);
+        IResult Update(UpdateCompanyDto dto);
+        Task<IResult> AddDetail(AddCompanyOrderDetailDto dto);
         IDataResult<List<CompanyOrderResponseDto>> GetList();
 
     }

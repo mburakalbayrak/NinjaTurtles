@@ -1,4 +1,6 @@
-﻿namespace NinjaTurtles.Entities.Dtos
+﻿using Microsoft.AspNetCore.Http;
+
+namespace NinjaTurtles.Entities.Dtos
 {
     public class QrCodeHumanUpdateDto
     {
@@ -25,5 +27,7 @@
         public string? SecondaryContactPhone { get; set; } // 2. Yakın Telefon
         public string? Url { get; set; } // Url Link ekleyebilir
         public string? Description { get; set; } // Bireysel Not olarak da kullanılabilir 
+        public IFormFile? File { get; set; }
+
     }
 }

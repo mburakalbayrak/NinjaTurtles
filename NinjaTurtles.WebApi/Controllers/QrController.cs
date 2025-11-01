@@ -25,7 +25,7 @@ namespace NinjaTurtles.WebApi.Controllers
 
 
         [HttpPost("[action]")]
-        public IActionResult CreateHumanDetail([FromBody] QrCodeHumanCreateDto dto)
+        public IActionResult CreateHumanDetail([FromForm] QrCodeHumanCreateDto dto)
         {
             var result = _qrService.CreateHumanDetail(dto);
             return Ok(result);

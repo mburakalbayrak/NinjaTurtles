@@ -1,13 +1,14 @@
-﻿using NinjaTurtles.Business.Abstract;
+﻿using AutoMapper;
+using Microsoft.Extensions.Configuration;
+using NinjaTurtles.Business.Abstract;
 using NinjaTurtles.Business.Constants;
+using NinjaTurtles.Core.Helpers.QrCodeGeneratator;
 using NinjaTurtles.Core.Utilities.Results;
 using NinjaTurtles.DataAccess.Abstract;
 using NinjaTurtles.Entities.Concrete;
 using NinjaTurtles.Entities.Dtos;
-using static QRCoder.PayloadGenerator;
 using System.Drawing.Imaging;
-using AutoMapper;
-using NinjaTurtles.Core.Helpers.QrCodeGeneratator;
+using static QRCoder.PayloadGenerator;
 
 namespace NinjaTurtles.Business.Concrete
 {
@@ -16,13 +17,15 @@ namespace NinjaTurtles.Business.Concrete
         private ICompanyDal _company;
         private ICompanyOrderDetailDal _companyOrderDetail;
         private IQrCodeMainDal _qrCodeMainDal;
+        private IConfiguration _config;
         private IMapper _mapper;
 
-        public CompanyManager(ICompanyDal companyOrder, ICompanyOrderDetailDal companyOrderDetail, IQrCodeMainDal qrCodeMainDal, IMapper mapper)
+        public CompanyManager(ICompanyDal company, ICompanyOrderDetailDal companyOrderDetail, IQrCodeMainDal qrCodeMainDal, IConfiguration config, IMapper mapper)
         {
-            _company = companyOrder;
+            _company = company;
             _companyOrderDetail = companyOrderDetail;
             _qrCodeMainDal = qrCodeMainDal;
+            _config = config;
             _mapper = mapper;
         }
 
@@ -46,10 +49,12 @@ namespace NinjaTurtles.Business.Concrete
             return new SuccessDataResult<List<CompanyOrderResponseDto>>(companyOrderDto, Messages.CustomerGetList);
         }
 
-        public async Task<IResult> AddDetail(AddCompanyOrderDetailDto dto, string path)
+        public async Task<IResult> AddDetail(AddCompanyOrderDetailDto dto)
         {
             try
             {
+
+
                 var cod = new CompanyOrderDetail();
                 cod.CompanyOrderId = dto.CompanyOrderId;
                 cod.ProductId = dto.ProductId;
@@ -62,7 +67,9 @@ namespace NinjaTurtles.Business.Concrete
                 var company = _company.Get(c => c.Id == cod.CompanyOrderId);
 
                 var companyOrderCount = _companyOrderDetail.GetList(c => c.CompanyOrderId == cod.CompanyOrderId && c.IsActive).Count();
-                var basedirectory = $"{path}/UploadFiles/QrCode/{company.Name}/{cod.Id}";
+
+                string directory = _config.GetSection("Directories:FileDirectory").Value;
+                var basedirectory = $"{directory}/QrCode/{company.Name}/{cod.Id}";
                 DirectoryInfo di = Directory.CreateDirectory(basedirectory);
 
                 var url = "www.karekodla.com/Qr/";
@@ -97,6 +104,20 @@ namespace NinjaTurtles.Business.Concrete
             {
                 return new Result(false, ex.Message);
             }
+        }
+
+        public IResult Update(UpdateCompanyDto dto)
+        {
+            var company = _company.Get(c => c.Id == dto.Id && c.IsActive);
+            if (company == null)
+                return new Result(false, Messages.DataNotFound);
+
+            company.Name = dto.Name;
+            company.ShortName = dto.ShortName;
+            company.ModifiedDate = DateTime.Now;
+            company.ModifiedBy = 1;
+            _company.Update(company);
+            return new Result(true, Messages.ProductUpdated);
         }
     }
 }

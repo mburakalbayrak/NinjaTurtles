@@ -28,6 +28,8 @@ namespace NinjaTurtles.Core.Helpers.QrCodeGeneratator
             var pngQr = new PngByteQRCode(qrData);
             byte[] qrPngBytes = pngQr.GetGraphic(
     pixelsPerModule: 20,
+     darkColorRgba: new byte[] { 0, 0, 0, 255 },     
+    lightColorRgba: new byte[] { 255, 255, 255, 0 }, 
     drawQuietZones: false);
             using Image<Rgba32> qrImg = Image.Load<Rgba32>(qrPngBytes);
 

@@ -1,14 +1,19 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore.Query.Internal;
+using Microsoft.Extensions.Configuration;
 using NinjaTurtles.Business.Abstract;
 using NinjaTurtles.Business.Constants;
+using NinjaTurtles.Core.DataAccess.Concrete.Dto;
 using NinjaTurtles.Core.Entities;
 using NinjaTurtles.Core.Entities.Enums;
+using NinjaTurtles.Core.Helpers.FileUpload;
 using NinjaTurtles.Core.Utilities.Results;
 using NinjaTurtles.DataAccess.Abstract;
 using NinjaTurtles.DataAccess.Concrete.EntityFramework;
 using NinjaTurtles.Entities.Concrete;
 using NinjaTurtles.Entities.Dtos;
+using System.IO;
+using static QRCoder.PayloadGenerator;
 
 namespace NinjaTurtles.Business.Concrete
 {
@@ -17,19 +22,19 @@ namespace NinjaTurtles.Business.Concrete
         private IQrCodeMainDal _qrCodeMainDal;
         private IQrCodeHumanDetailDal _qrCodeHumanDetailDal;
         private IQrCodeAnimalDetailDal _qrCodeAnimalDetailDal;
-        private ICustomerDal _customerDal;
         private ICustomerQrVerificationDal _customerQrVerificationDal;
         private IParamItemDal _paramItemDal;
+        private IConfiguration _config;
         private IMapper _mapper;
 
-        public QrManager(IQrCodeMainDal qrCodeMainDal, IQrCodeHumanDetailDal qrCodeHumanDetailDal, IQrCodeAnimalDetailDal qrCodeAnimalDetailDal, ICustomerDal customerDal, ICustomerQrVerificationDal customerQrVerificationDal, IParamItemDal paramItemDal, IMapper mapper)
+        public QrManager(IQrCodeMainDal qrCodeMainDal, IQrCodeHumanDetailDal qrCodeHumanDetailDal, IQrCodeAnimalDetailDal qrCodeAnimalDetailDal, ICustomerQrVerificationDal customerQrVerificationDal, IParamItemDal paramItemDal, IConfiguration config, IMapper mapper)
         {
             _qrCodeMainDal = qrCodeMainDal;
             _qrCodeHumanDetailDal = qrCodeHumanDetailDal;
             _qrCodeAnimalDetailDal = qrCodeAnimalDetailDal;
-            _customerDal = customerDal;
             _customerQrVerificationDal = customerQrVerificationDal;
             _paramItemDal = paramItemDal;
+            _config = config;
             _mapper = mapper;
         }
 
@@ -41,22 +46,12 @@ namespace NinjaTurtles.Business.Concrete
 
             var qrAnimal = _mapper.Map<QrCodeAnimalDetail>(dto);
 
-            if (qr.DetailTypeId == null)
-            {
-                qr.DetailTypeId = 2;
-                qr.CustomerId = dto.CustomerId;
-                _qrCodeAnimalDetailDal.Add(qrAnimal);
-                _qrCodeMainDal.Update(qr);
-                return new Result(true, Messages.QrFilled);
-            }
+            qr.DetailTypeId = 2;
+            qr.CustomerId = dto.CustomerId;
+            _qrCodeAnimalDetailDal.Add(qrAnimal);
+            _qrCodeMainDal.Update(qr);
+            return new Result(true, Messages.QrFilled);
 
-            if (qr.DetailTypeId == 2)
-            {
-                _qrCodeAnimalDetailDal.Update(qrAnimal);
-                return new Result(true, Messages.QrFilled);
-            }
-
-            return new Result(false, Messages.DataNotFound);
         }
 
         public IResult CreateHumanDetail(QrCodeHumanCreateDto dto)
@@ -71,6 +66,21 @@ namespace NinjaTurtles.Business.Concrete
 
                 qr.DetailTypeId = 1;
                 qr.CustomerId = dto.CustomerId;
+                if (dto.File != null)
+                {
+                    //var currentdirectory = @"D:\vhosts\karekodla.com\UploadFiles\ProfilePictures\";
+                    string directory = _config.GetSection("Directories:FileDirectory").Value;
+
+                    string path = System.IO.Path.Combine(_config.GetSection("Directories:FileRootUpload").Value, "ProfilePictures");
+                    CreateFileWithFileNameDto uploadFile = new CreateFileWithFileNameDto()
+                    {
+                        File = dto.File,
+                        FolderPath = path,
+                        FileName = dto.File.FileName
+                    };
+                    var file = WriteFile.CreateFileWithFileName(uploadFile).Data;
+                    qrHuman.ProfilePictureUrl = dto.File.Name;
+                }
                 _qrCodeHumanDetailDal.Add(qrHuman);
                 _qrCodeMainDal.Update(qr);
                 return new Result(true, Messages.QrFilled);
@@ -155,6 +165,13 @@ namespace NinjaTurtles.Business.Concrete
                     var qrHuman = _qrCodeHumanDetailDal.Get(c => c.QrMainId == qr.Id);
                     qrDto.HumanDetail = _mapper.Map<QrCodeHumanDetailDto>(qrHuman);
 
+                    string directory = _config.GetSection("Directories:FileRootUpload").Value;
+                    string filePath = Path.Combine(directory, "ProfilePictures", qrHuman.ProfilePictureUrl);
+                    FileInfo fileInfo = new FileInfo(filePath);
+                    var bytes = File.ReadAllBytes(filePath);
+
+                    qrDto.HumanDetail.ProfilePictureData = Convert.ToBase64String(bytes);
+
                     qrDto.HumanDetail.Gender = qrHuman.GenderId != null
                        ? paramList.FirstOrDefault(c => c.Id == qrHuman.GenderId)?.Name : null;
 
@@ -211,6 +228,25 @@ namespace NinjaTurtles.Business.Concrete
             qr.DetailTypeId = 1;
             _qrCodeMainDal.Update(qr);
             var qrHuman = _mapper.Map<QrCodeHumanDetail>(dto);
+
+            if (dto.File != null)
+            {
+                string directory = _config.GetSection("Directories:FileDirectory").Value;
+
+                string path = System.IO.Path.Combine(_config.GetSection("Directories:FileRootUpload").Value, "ProfilePictures");
+                CreateFileWithFileNameDto uploadFile = new CreateFileWithFileNameDto()
+                {
+                    File = dto.File,
+                    FolderPath = path,
+                    FileName = dto.File.FileName
+                };
+                var file = WriteFile.CreateFileWithFileName(uploadFile).Data;
+                var oldFile = System.IO.Path.Combine(_config.GetSection("Directories:FileRootUpload").Value, "ProfilePictures", qrHuman.ProfilePictureUrl);
+                if (System.IO.File.Exists(oldFile))
+                    System.IO.File.Delete(oldFile);
+
+                qrHuman.ProfilePictureUrl = dto.File.Name;
+            }
             _qrCodeHumanDetailDal.Update(qrHuman);
             return new Result(true, Messages.QrFilled);
 

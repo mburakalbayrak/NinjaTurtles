@@ -6,48 +6,47 @@ using NinjaTurtles.Entities.Concrete;
 using NinjaTurtles.Entities.Dtos;
 using static QRCoder.PayloadGenerator;
 using System.Drawing.Imaging;
-using System.IO;
-using NinjaTurtles.Core.Helpers.QrCode;
-using NinjaTurtles.Core.Entities;
 using AutoMapper;
+using NinjaTurtles.Core.Helpers.QrCodeGeneratator;
 
 namespace NinjaTurtles.Business.Concrete
 {
     public class CompanyManager : ICompanyService
     {
-        private ICompanyDal _companyOrder;
+        private ICompanyDal _company;
         private ICompanyOrderDetailDal _companyOrderDetail;
         private IQrCodeMainDal _qrCodeMainDal;
         private IMapper _mapper;
 
         public CompanyManager(ICompanyDal companyOrder, ICompanyOrderDetailDal companyOrderDetail, IQrCodeMainDal qrCodeMainDal, IMapper mapper)
         {
-            _companyOrder = companyOrder;
+            _company = companyOrder;
             _companyOrderDetail = companyOrderDetail;
             _qrCodeMainDal = qrCodeMainDal;
             _mapper = mapper;
         }
 
-        public IResult Add(string name)
+        public IResult Add(AddCompanyDto dto)
         {
             var company = new Company();
-            company.Name = name;
+            company.Name = dto.Name;
+            company.ShortName = dto.ShortName;
             company.CreatedDate = DateTime.Now;
             company.IsActive = true;
 
-            _companyOrder.Add(company);
+            _company.Add(company);
             return new Result(true, Messages.CompanyAdded);
         }
 
         public IDataResult<List<CompanyOrderResponseDto>> GetList()
         {
-            var result = _companyOrder.GetList(x=> x.IsActive);
+            var result = _company.GetList(x => x.IsActive);
             var companyOrderDto = _mapper.Map<List<CompanyOrderResponseDto>>(result);
 
             return new SuccessDataResult<List<CompanyOrderResponseDto>>(companyOrderDto, Messages.CustomerGetList);
         }
 
-        public IResult AddDetail(AddCompanyOrderDetailDto dto,string path)
+        public async Task<IResult> AddDetail(AddCompanyOrderDetailDto dto, string path)
         {
             try
             {
@@ -60,9 +59,9 @@ namespace NinjaTurtles.Business.Concrete
                 cod.IsActive = true;
                 _companyOrderDetail.Add(cod);
 
-                var company = _companyOrder.Get(c => c.Id == cod.CompanyOrderId);
+                var company = _company.Get(c => c.Id == cod.CompanyOrderId);
 
-
+                var companyOrderCount = _companyOrderDetail.GetList(c => c.CompanyOrderId == cod.CompanyOrderId && c.IsActive).Count();
                 var basedirectory = $"{path}/UploadFiles/QrCode/{company.Name}/{cod.Id}";
                 DirectoryInfo di = Directory.CreateDirectory(basedirectory);
 
@@ -70,12 +69,21 @@ namespace NinjaTurtles.Business.Concrete
                 for (int i = 1; i <= cod.Quantity; i++)
                 {
                     var guid = Guid.NewGuid();
-                    var filePath = $"{basedirectory}/{guid}.png";
+                    var filePath = $"{basedirectory}/{company.ShortName}#{companyOrderCount}#{i}.png";
                     var barcodeContent = url + guid;
-                    var result = QRCodeHelper.SaveQRCodeAsImage(barcodeContent, filePath, ImageFormat.Png);
 
+
+                    var saved = await QRCodeHelper.GenerateQrWithLabelAsync(
+    content: barcodeContent,
+    labelText: $"{company.ShortName}#{companyOrderCount}#{i}",
+    savePath: filePath,
+    position: QRCodeHelper.LabelPosition.Bottom,
+    pixelsPerModule: 20,
+    fontFilePath: null // istersen TTF dosya yolu ver
+);
                     var qrcodeMain = new QrCodeMain();
                     qrcodeMain.Id = guid;
+                    qrcodeMain.CompanyOrderDetailId = cod.Id;
                     qrcodeMain.ImageUrl = filePath;
                     qrcodeMain.RedirectUrl = url;
                     qrcodeMain.CreatedDate = DateTime.Now;
@@ -87,7 +95,7 @@ namespace NinjaTurtles.Business.Concrete
             }
             catch (Exception ex)
             {
-                return new Result(false,ex.Message);
+                return new Result(false, ex.Message);
             }
         }
     }

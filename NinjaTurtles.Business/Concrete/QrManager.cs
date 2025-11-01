@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using NinjaTurtles.Business.Abstract;
 using NinjaTurtles.Business.Constants;
 using NinjaTurtles.Core.Entities;
@@ -82,55 +83,53 @@ namespace NinjaTurtles.Business.Concrete
 
         public IDataResult<QrCodeAnimalDetailDto> GetAnimalDetailVerify(QrUpdateVerifyDto dto)
         {
-            var date = DateTime.Now;
-            var hasCode = _customerQrVerificationDal.Get(c => c.Code == dto.Code && c.ExpireDate > date);
+            var now = DateTime.Now;
+            var hasCode = _customerQrVerificationDal.Get(c => c.Code == dto.Code && c.ExpireDate > now);
             if (hasCode == null)
                 return new ErrorDataResult<QrCodeAnimalDetailDto>(message: Messages.VerifyCodeExpired);
 
-            var qrAnimal = _qrCodeAnimalDetailDal.Get(c => c.QrMainId == dto.QrMainId);
+            var qr = _qrCodeMainDal.Get(c => c.CustomerId == hasCode.CustomerId && c.Id == dto.QrMainId);
+            if (qr == null)
+                return new ErrorDataResult<QrCodeAnimalDetailDto>(null, Messages.DataNotFound);
+
+            var qrAnimal = _qrCodeAnimalDetailDal.Get(c => c.QrMainId == qr.Id);
             if (qrAnimal == null)
                 return new ErrorDataResult<QrCodeAnimalDetailDto>(null, Messages.DataNotFound);
-            var animalDto = _mapper.Map<QrCodeAnimalDetailDto>(qrAnimal);
-            return new SuccessDataResult<QrCodeAnimalDetailDto>(data: animalDto, message: Messages.AccountVerifySuccess);
+
+            return new SuccessDataResult<QrCodeAnimalDetailDto>(
+                _mapper.Map<QrCodeAnimalDetailDto>(qrAnimal),
+                Messages.AccountVerifySuccess
+            );
         }
 
         public IDataResult<QrCodeHumanDetailDto> GetHumanDetailVerify(QrUpdateVerifyDto dto)
         {
-            var date = DateTime.Now;
-            var hasCode = _customerQrVerificationDal.Get(c => c.Code == dto.Code && c.ExpireDate > date);
+            var now = DateTime.Now;
+            var hasCode = _customerQrVerificationDal.Get(c => c.Code == dto.Code && c.ExpireDate > now);
             if (hasCode == null)
                 return new ErrorDataResult<QrCodeHumanDetailDto>(message: Messages.VerifyCodeExpired);
 
-            var qrHuman = _qrCodeHumanDetailDal.Get(c => c.QrMainId == dto.QrMainId);
+            var qr = _qrCodeMainDal.Get(c => c.CustomerId == hasCode.CustomerId && c.Id == dto.QrMainId);
+            if (qr == null)
+                return new ErrorDataResult<QrCodeHumanDetailDto>(null, Messages.DataNotFound);
+
+            var qrHuman = _qrCodeHumanDetailDal.Get(c => c.QrMainId == qr.Id);
             if (qrHuman == null)
                 return new ErrorDataResult<QrCodeHumanDetailDto>(null, Messages.DataNotFound);
-            var paramList = _paramItemDal.GetList();
 
+            var paramList = _paramItemDal.GetList();
             var qrDto = _mapper.Map<QrCodeHumanDetailDto>(qrHuman);
 
-            qrDto.Gender = qrHuman.GenderId != null
-               ? paramList.FirstOrDefault(c => c.Id == qrHuman.GenderId)?.Name : null;
+            qrDto.Gender = paramList.FirstOrDefault(c => c.Id == qrHuman.GenderId)?.Name;
+            qrDto.MaritalStatus = paramList.FirstOrDefault(c => c.Id == qrHuman.MaritalStatusId)?.Name;
+            qrDto.EducationStatus = paramList.FirstOrDefault(c => c.Id == qrHuman.EducationStatusId)?.Name;
+            qrDto.CityOfResidence = paramList.FirstOrDefault(c => c.Id == qrHuman.CityOfResidenceId)?.Name;
+            qrDto.BloodType = paramList.FirstOrDefault(c => c.Id == qrHuman.BloodTypeId)?.Name;
+            qrDto.Profession = paramList.FirstOrDefault(c => c.Id == qrHuman.ProfessionId)?.Name;
+            qrDto.PrimaryRelation = paramList.FirstOrDefault(c => c.Id == qrHuman.PrimaryRelationId)?.Name;
+            qrDto.SecondaryRelation = paramList.FirstOrDefault(c => c.Id == qrHuman.SecondaryRelationId)?.Name;
 
-            qrDto.MaritalStatus = qrHuman.MaritalStatusId != null
-                 ? paramList.FirstOrDefault(c => c.Id == qrHuman.MaritalStatusId)?.Name : null;
-
-            qrDto.EducationStatus = qrHuman.EducationStatusId != null
-? paramList.FirstOrDefault(c => c.Id == qrHuman.EducationStatusId)?.Name : null;
-
-            qrDto.CityOfResidence = qrHuman.CityOfResidenceId != null
-                ? paramList.FirstOrDefault(c => c.Id == qrHuman.CityOfResidenceId)?.Name : null;
-
-            qrDto.BloodType = qrHuman.BloodTypeId != null
-                ? paramList.FirstOrDefault(c => c.Id == qrHuman.BloodTypeId)?.Name : null;
-
-            qrDto.Profession = qrHuman.ProfessionId != null
-                ? paramList.FirstOrDefault(c => c.Id == qrHuman.ProfessionId)?.Name : null;
-
-            qrDto.PrimaryRelation = qrHuman.PrimaryRelationId != null
-                ? paramList.FirstOrDefault(c => c.Id == qrHuman.PrimaryRelationId)?.Name : null;
-
-            qrDto.SecondaryRelation = qrHuman.SecondaryRelationId != null
-                ? paramList.FirstOrDefault(c => c.Id == qrHuman.SecondaryRelationId)?.Name : null; return new SuccessDataResult<QrCodeHumanDetailDto>(data: qrDto, message: Messages.AccountVerifySuccess);
+            return new SuccessDataResult<QrCodeHumanDetailDto>(qrDto, Messages.AccountVerifySuccess);
         }
 
         public IDataResult<QrCodeDetailDto> GetQrDetail(Guid id)

@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NinjaTurtles.Business.Abstract;
-using NinjaTurtles.Core.Helpers.QrCode;
-using NinjaTurtles.Core.NetCoreConfiguration;
-using NinjaTurtles.Entities.Config;
+
 using NinjaTurtles.Entities.Dtos;
-using System.Drawing.Imaging;
-using System.Threading.Tasks;
+
 
 namespace NinjaTurtles.WebApi.Controllers
 {

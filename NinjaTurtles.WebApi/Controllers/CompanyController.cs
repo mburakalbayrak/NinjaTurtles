@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NinjaTurtles.Business.Abstract;
 using NinjaTurtles.Entities.Dtos;
+using System.Threading.Tasks;
 
 namespace NinjaTurtles.WebApi.Controllers
 {
@@ -23,20 +24,20 @@ namespace NinjaTurtles.WebApi.Controllers
         }
 
         [HttpPost("[action]")]
-        public IActionResult Add([FromBody] string name)
+        public IActionResult Add([FromBody] AddCompanyDto dto)
         {
-            var result =_companyService.Add(name);
+            var result = _companyService.Add(dto);
             return Ok(result);
         }
 
         [HttpPost("[action]")]
-        public IActionResult AddCompanyOrder([FromBody] AddCompanyOrderDetailDto dto)
+        public async Task<IActionResult> AddCompanyOrder([FromBody] AddCompanyOrderDetailDto dto)
         {
-            var currentdirectory = Directory.GetCurrentDirectory();
-            var result = _companyService.AddDetail(dto,currentdirectory);
+            var currentdirectory = @"D:\vhosts\karekodla.com\";
+            var result = await _companyService.AddDetail(dto, currentdirectory);
             return Ok(result);
         }
 
-      
+
     }
 }

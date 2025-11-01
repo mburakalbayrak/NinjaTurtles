@@ -52,7 +52,7 @@ namespace NinjaTurtles.WebApi.Controllers
             return Ok(qr);
         }
         [HttpPost("[action]")]
-        public IActionResult UpdateHumanDetail([FromBody] QrCodeHumanUpdateDto dto)
+        public IActionResult UpdateHumanDetail([FromForm] QrCodeHumanUpdateDto dto)
         {
             var result = _qrService.UpdateHumanDetail(dto);
             return Ok(result);

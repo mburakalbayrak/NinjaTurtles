@@ -39,14 +39,14 @@ namespace NinjaTurtles.WebApi.Controllers
         }
 
         [HttpGet("[action]")]
-        public IActionResult GetHumanDetailVerify(QrUpdateVerifyDto dto)
+        public IActionResult GetHumanDetailVerify([FromQuery] QrUpdateVerifyDto dto)
         {
             var qr = _qrService.GetHumanDetailVerify(dto);
             return Ok(qr);
         }
 
         [HttpGet("[action]")]
-        public IActionResult GetAnimalDetailVerify(QrUpdateVerifyDto dto)
+        public IActionResult GetAnimalDetailVerify([FromQuery] QrUpdateVerifyDto dto)
         {
             var qr = _qrService.GetAnimalDetailVerify(dto);
             return Ok(qr);

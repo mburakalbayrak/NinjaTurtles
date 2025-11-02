@@ -23,8 +23,5 @@
 		<ProjectReference Include="..\NinjaTurtles.Core\NinjaTurtles.Core.csproj" />
 		<ProjectReference Include="..\NinjaTurtles.DataAccess\NinjaTurtles.DataAccess.csproj" />
 	</ItemGroup>
-	<ItemGroup>
-		<!-- Sadece appsettings.json'ı alma -->
-		<Content Update="appsettings.json" CopyToPublishDirectory="Never" CopyToOutputDirectory="Never" />
-	</ItemGroup>
+	
 </Project>

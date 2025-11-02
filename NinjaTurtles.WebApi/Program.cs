@@ -116,7 +116,7 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseRouting();
 
@@ -137,7 +137,8 @@ app.Use(async (context, next) =>
 app.UseCors(_ => _
 .AllowAnyOrigin()
 .AllowAnyMethod()
-.AllowAnyHeader());
+.AllowAnyHeader()
+.WithExposedHeaders("Content-Disposition"));
 
 
 // UseAuthentication üstte olmalý  UseAuthorization aþaðýda olmalý, UseAuthentication eve girmek için izindir, UseAuthorization evin içindeki mutfaða girmek için role gibi düþünebiliriz

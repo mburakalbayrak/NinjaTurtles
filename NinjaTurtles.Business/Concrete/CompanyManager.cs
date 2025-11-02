@@ -53,8 +53,6 @@ namespace NinjaTurtles.Business.Concrete
         {
             try
             {
-
-
                 var cod = new CompanyOrderDetail();
                 cod.CompanyOrderId = dto.CompanyId;
                 cod.ProductId = dto.ProductId;
@@ -70,7 +68,7 @@ namespace NinjaTurtles.Business.Concrete
                 string directory = Path.Combine(@"D:\vhosts\karekodla.com\UploadFiles\QrCode",company.Name,cod.Id.ToString());
                 DirectoryInfo di = Directory.CreateDirectory(directory);
 
-                var url = "www.karekodla.com/Qr/";
+                var url = "www.karekodla.com/Qr/?id=";
                 for (int i = 1; i <= cod.Quantity; i++)
                 {
                     var guid = Guid.NewGuid();

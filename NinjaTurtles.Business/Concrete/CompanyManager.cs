@@ -67,7 +67,7 @@ namespace NinjaTurtles.Business.Concrete
                 var company = _company.Get(c => c.Id == cod.CompanyOrderId);
 
                 var companyOrderCount = _companyOrderDetail.GetList(c => c.CompanyOrderId == cod.CompanyOrderId && c.IsActive).Count();
-                string directory = Path.Combine(_config.GetSection("Directories:FileDirectory").Value,"QrCode",company.Name,cod.Id.ToString());
+                string directory = Path.Combine(@"D:\vhosts\karekodla.com\UploadFiles\QrCode",company.Name,cod.Id.ToString());
                 DirectoryInfo di = Directory.CreateDirectory(directory);
 
                 var url = "www.karekodla.com/Qr/";

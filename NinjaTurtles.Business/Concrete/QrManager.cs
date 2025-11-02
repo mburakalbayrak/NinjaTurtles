@@ -62,8 +62,8 @@ namespace NinjaTurtles.Business.Concrete
                 qr.CustomerId = dto.CustomerId;
                 if (dto.File != null)
                 {
-                    //var currentdirectory = @"D:\vhosts\karekodla.com\UploadFiles\ProfilePictures\";
-                    string directory = _config.GetSection("Directories:FileDirectory").Value;
+                    var directory = @"D:\vhosts\karekodla.com\UploadFiles\";
+                    //string directory = _config.GetSection("Directories:FileDirectory").Value;
 
                     string path = System.IO.Path.Combine(directory, "ProfilePictures");
                     CreateFileWithFileNameDto uploadFile = new CreateFileWithFileNameDto()
@@ -159,7 +159,8 @@ namespace NinjaTurtles.Business.Concrete
                     var qrHuman = _qrCodeHumanDetailDal.Get(c => c.QrMainId == qr.Id);
                     qrDto.HumanDetail = _mapper.Map<QrCodeHumanDetailDto>(qrHuman);
 
-                    string directory = _config.GetSection("Directories:FileDirectory").Value;
+                    //string directory = _config.GetSection("Directories:FileDirectory").Value;
+                    var directory = @"D:\vhosts\karekodla.com\UploadFiles\";
 
                     string filePath = Path.Combine(directory, "ProfilePictures", qrHuman.ProfilePictureUrl);
                     FileInfo fileInfo = new FileInfo(filePath);
@@ -226,17 +227,18 @@ namespace NinjaTurtles.Business.Concrete
 
             if (dto.File != null)
             {
-                string directory = _config.GetSection("Directories:FileDirectory").Value;
+                var directory = @"D:\vhosts\karekodla.com\UploadFiles\ProfilePictures";
 
-                string path = System.IO.Path.Combine(_config.GetSection("Directories:FileRootUpload").Value, "ProfilePictures");
+                //string directory = _config.GetSection("Directories:FileDirectory").Value;
+
                 CreateFileWithFileNameDto uploadFile = new CreateFileWithFileNameDto()
                 {
                     File = dto.File,
-                    FolderPath = path,
+                    FolderPath = directory,
                     FileName = dto.File.FileName
                 };
                 var file = WriteFile.CreateFileWithFileName(uploadFile).Data;
-                var oldFile = System.IO.Path.Combine(_config.GetSection("Directories:FileRootUpload").Value, "ProfilePictures", qrHuman.ProfilePictureUrl);
+                var oldFile = System.IO.Path.Combine(directory, qrHuman.ProfilePictureUrl);
                 if (System.IO.File.Exists(oldFile))
                     System.IO.File.Delete(oldFile);
 

@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using NinjaTurtles.Business.Abstract;
 using NinjaTurtles.Business.Constants;
 using NinjaTurtles.Core.DataAccess.Concrete.Dto;
+using NinjaTurtles.Core.Entities;
 using NinjaTurtles.Core.Helpers.FileUpload;
 using NinjaTurtles.Core.Utilities.Results;
 using NinjaTurtles.DataAccess.Abstract;
@@ -17,16 +19,18 @@ namespace NinjaTurtles.Business.Concrete
         private IQrCodeHumanDetailDal _qrCodeHumanDetailDal;
         private IQrCodeAnimalDetailDal _qrCodeAnimalDetailDal;
         private ICustomerQrVerificationDal _customerQrVerificationDal;
+        private IQrLogDal _qrLogDal;
         private IParamItemDal _paramItemDal;
         private IConfiguration _config;
         private IMapper _mapper;
 
-        public QrManager(IQrCodeMainDal qrCodeMainDal, IQrCodeHumanDetailDal qrCodeHumanDetailDal, IQrCodeAnimalDetailDal qrCodeAnimalDetailDal, ICustomerQrVerificationDal customerQrVerificationDal, IParamItemDal paramItemDal, IConfiguration config, IMapper mapper)
+        public QrManager(IQrCodeMainDal qrCodeMainDal, IQrCodeHumanDetailDal qrCodeHumanDetailDal, IQrCodeAnimalDetailDal qrCodeAnimalDetailDal, ICustomerQrVerificationDal customerQrVerificationDal, IQrLogDal qrLogDal, IParamItemDal paramItemDal, IConfiguration config, IMapper mapper)
         {
             _qrCodeMainDal = qrCodeMainDal;
             _qrCodeHumanDetailDal = qrCodeHumanDetailDal;
             _qrCodeAnimalDetailDal = qrCodeAnimalDetailDal;
             _customerQrVerificationDal = customerQrVerificationDal;
+            _qrLogDal = qrLogDal;
             _paramItemDal = paramItemDal;
             _config = config;
             _mapper = mapper;
@@ -44,6 +48,18 @@ namespace NinjaTurtles.Business.Concrete
             qr.CustomerId = dto.CustomerId;
             _qrCodeAnimalDetailDal.Add(qrAnimal);
             _qrCodeMainDal.Update(qr);
+
+            var qrlog = new QrLog
+            {
+                LogTypeId = 2,
+                QrCodeMainId = qr.Id,
+                IpAddress = "",
+                CreatedDate = DateTime.Now,
+                CreatedBy = 1,
+                IsActive = true,
+
+            };
+            _qrLogDal.Add(qrlog);
             return new Result(true, Messages.QrFilled);
 
         }
@@ -70,13 +86,26 @@ namespace NinjaTurtles.Business.Concrete
                     {
                         File = dto.File,
                         FolderPath = path,
-                        FileName = dto.File.FileName
+                        FileName = qrHuman.FullName + "_" + DateTime.Now.ToShortDateString() + "_" + DateTime.Now.ToShortTimeString() + "_" + dto.File.FileName
                     };
                     var file = WriteFile.CreateFileWithFileName(uploadFile).Data;
-                    qrHuman.ProfilePictureUrl = dto.File.Name;
+                    qrHuman.ProfilePictureUrl = uploadFile.FileName;
                 }
                 _qrCodeHumanDetailDal.Add(qrHuman);
                 _qrCodeMainDal.Update(qr);
+
+
+                var qrlog = new QrLog
+                {
+                    LogTypeId = 2,
+                    QrCodeMainId = qr.Id,
+                    IpAddress = "",
+                    CreatedDate = DateTime.Now,
+                    CreatedBy = 1,
+                    IsActive = true,
+
+                };
+                _qrLogDal.Add(qrlog);
                 return new Result(true, Messages.QrFilled);
             }
             catch (Exception ex)
@@ -120,10 +149,21 @@ namespace NinjaTurtles.Business.Concrete
             var qrHuman = _qrCodeHumanDetailDal.Get(c => c.QrMainId == qr.Id);
             if (qrHuman == null)
                 return new ErrorDataResult<QrCodeHumanDetailDto>(null, Messages.DataNotFound);
-
+           
             var paramList = _paramItemDal.GetList();
             var qrDto = _mapper.Map<QrCodeHumanDetailDto>(qrHuman);
 
+            if (qrHuman.ProfilePictureUrl != null)
+            {
+                var directory = @"D:\vhosts\karekodla.com\UploadFiles\";
+                string filePath = Path.Combine(directory, "ProfilePictures", qrHuman.ProfilePictureUrl);
+                if (System.IO.File.Exists(filePath))
+                {
+                    FileInfo fileInfo = new FileInfo(filePath);
+                    var bytes = File.ReadAllBytes(filePath);
+                    qrDto.ProfilePictureData = Convert.ToBase64String(bytes);
+                }
+            }
             qrDto.Gender = paramList.FirstOrDefault(c => c.Id == qrHuman.GenderId)?.Name;
             qrDto.MaritalStatus = paramList.FirstOrDefault(c => c.Id == qrHuman.MaritalStatusId)?.Name;
             qrDto.EducationStatus = paramList.FirstOrDefault(c => c.Id == qrHuman.EducationStatusId)?.Name;
@@ -138,66 +178,92 @@ namespace NinjaTurtles.Business.Concrete
 
         public IDataResult<QrCodeDetailDto> GetQrDetail(Guid id)
         {
-            var qr = _qrCodeMainDal.Get(c => c.Id == id && c.IsActive && !c.IsDeleted);
-            if (qr == null)
-                return new ErrorDataResult<QrCodeDetailDto>(null, Messages.DataNotFound);
-
-            var qrDto = new QrCodeDetailDto
+            try
             {
-                DetailTypeId = qr.DetailTypeId ?? default,
-                Empty = !qr.DetailTypeId.HasValue
-            };
+                var qr = _qrCodeMainDal.Get(c => c.Id == id && c.IsActive && !c.IsDeleted);
+                if (qr == null)
+                    return new ErrorDataResult<QrCodeDetailDto>(null, Messages.DataNotFound);
 
-            if (qrDto.Empty)
-                return new SuccessDataResult<QrCodeDetailDto>(qrDto, Messages.EmptyQr);
 
-            var paramList = _paramItemDal.GetList();
+                var qrlog = new QrLog
+                {
+                    LogTypeId = 1,
+                    QrCodeMainId = qr.Id,
+                    IpAddress = "",
+                    CreatedDate = DateTime.Now,
+                    CreatedBy = 1,
+                    IsActive = true,
 
-            switch (qr.DetailTypeId)
-            {
-                case 1:
-                    var qrHuman = _qrCodeHumanDetailDal.Get(c => c.QrMainId == qr.Id);
-                    qrDto.HumanDetail = _mapper.Map<QrCodeHumanDetailDto>(qrHuman);
+                };
+                _qrLogDal.Add(qrlog);
+                var qrDto = new QrCodeDetailDto
+                {
+                    DetailTypeId = qr.DetailTypeId ?? default,
+                    Empty = !qr.DetailTypeId.HasValue
+                };
 
-                    //string directory = _config.GetSection("Directories:FileDirectory").Value;
-                    var directory = @"D:\vhosts\karekodla.com\UploadFiles\";
+                if (qrDto.Empty)
+                    return new SuccessDataResult<QrCodeDetailDto>(qrDto, Messages.EmptyQr);
 
-                    string filePath = Path.Combine(directory, "ProfilePictures", qrHuman.ProfilePictureUrl);
-                    FileInfo fileInfo = new FileInfo(filePath);
-                    var bytes = File.ReadAllBytes(filePath);
+                var paramList = _paramItemDal.GetList();
 
-                    qrDto.HumanDetail.ProfilePictureData = Convert.ToBase64String(bytes);
-                    qrDto.HumanDetail.Gender = qrHuman.GenderId != null
-                       ? paramList.FirstOrDefault(c => c.Id == qrHuman.GenderId)?.Name : null;
+                switch (qr.DetailTypeId)
+                {
+                    case 1:
+                        var qrHuman = _qrCodeHumanDetailDal.Get(c => c.QrMainId == qr.Id);
+                        qrDto.HumanDetail = _mapper.Map<QrCodeHumanDetailDto>(qrHuman);
 
-                    qrDto.HumanDetail.MaritalStatus = qrHuman.MaritalStatusId != null
-                         ? paramList.FirstOrDefault(c => c.Id == qrHuman.MaritalStatusId)?.Name : null;
+                        if (qrHuman.ProfilePictureUrl != null)
+                        {
+                            //string directory = _config.GetSection("Directories:FileDirectory").Value;
 
-                    qrDto.HumanDetail.EducationStatus = qrHuman.EducationStatusId != null
-    ? paramList.FirstOrDefault(c => c.Id == qrHuman.EducationStatusId)?.Name : null;
+                            var directory = @"D:\vhosts\karekodla.com\UploadFiles\";
+                            string filePath = Path.Combine(directory, "ProfilePictures", qrHuman.ProfilePictureUrl);
+                            if (System.IO.File.Exists(filePath))
+                            {
+                                FileInfo fileInfo = new FileInfo(filePath);
+                                var bytes = File.ReadAllBytes(filePath);
+                                qrDto.HumanDetail.ProfilePictureData = Convert.ToBase64String(bytes);
+                            }
+                        }
 
-                    qrDto.HumanDetail.CityOfResidence = qrHuman.CityOfResidenceId != null
-                        ? paramList.FirstOrDefault(c => c.Id == qrHuman.CityOfResidenceId)?.Name : null;
 
-                    qrDto.HumanDetail.BloodType = qrHuman.BloodTypeId != null
-                        ? paramList.FirstOrDefault(c => c.Id == qrHuman.BloodTypeId)?.Name : null;
+                        qrDto.HumanDetail.Gender = qrHuman.GenderId != null
+                           ? paramList.FirstOrDefault(c => c.Id == qrHuman.GenderId)?.Name : null;
 
-                    qrDto.HumanDetail.Profession = qrHuman.ProfessionId != null
-                        ? paramList.FirstOrDefault(c => c.Id == qrHuman.ProfessionId)?.Name : null;
+                        qrDto.HumanDetail.MaritalStatus = qrHuman.MaritalStatusId != null
+                             ? paramList.FirstOrDefault(c => c.Id == qrHuman.MaritalStatusId)?.Name : null;
 
-                    qrDto.HumanDetail.PrimaryRelation = qrHuman.PrimaryRelationId != null
-                        ? paramList.FirstOrDefault(c => c.Id == qrHuman.PrimaryRelationId)?.Name : null;
+                        qrDto.HumanDetail.EducationStatus = qrHuman.EducationStatusId != null
+        ? paramList.FirstOrDefault(c => c.Id == qrHuman.EducationStatusId)?.Name : null;
 
-                    qrDto.HumanDetail.SecondaryRelation = qrHuman.SecondaryRelationId != null
-                        ? paramList.FirstOrDefault(c => c.Id == qrHuman.SecondaryRelationId)?.Name : null;
-                    break;
-                case 2:
-                    var qrAnimal = _qrCodeAnimalDetailDal.Get(c => c.QrMainId == qr.Id);
-                    qrDto.AnimalDetail = _mapper.Map<QrCodeAnimalDetailDto>(qrAnimal);
-                    break;
+                        qrDto.HumanDetail.CityOfResidence = qrHuman.CityOfResidenceId != null
+                            ? paramList.FirstOrDefault(c => c.Id == qrHuman.CityOfResidenceId)?.Name : null;
+
+                        qrDto.HumanDetail.BloodType = qrHuman.BloodTypeId != null
+                            ? paramList.FirstOrDefault(c => c.Id == qrHuman.BloodTypeId)?.Name : null;
+
+                        qrDto.HumanDetail.Profession = qrHuman.ProfessionId != null
+                            ? paramList.FirstOrDefault(c => c.Id == qrHuman.ProfessionId)?.Name : null;
+
+                        qrDto.HumanDetail.PrimaryRelation = qrHuman.PrimaryRelationId != null
+                            ? paramList.FirstOrDefault(c => c.Id == qrHuman.PrimaryRelationId)?.Name : null;
+
+                        qrDto.HumanDetail.SecondaryRelation = qrHuman.SecondaryRelationId != null
+                            ? paramList.FirstOrDefault(c => c.Id == qrHuman.SecondaryRelationId)?.Name : null;
+                        break;
+                    case 2:
+                        var qrAnimal = _qrCodeAnimalDetailDal.Get(c => c.QrMainId == qr.Id);
+                        qrDto.AnimalDetail = _mapper.Map<QrCodeAnimalDetailDto>(qrAnimal);
+                        break;
+                }
+
+                return new SuccessDataResult<QrCodeDetailDto>(qrDto);
             }
-
-            return new SuccessDataResult<QrCodeDetailDto>(qrDto);
+            catch (Exception ex)
+            {
+                return new ErrorDataResult<QrCodeDetailDto>(Messages.DataNotFound);
+            }
         }
 
         public IResult UpdateAnimalDetail(QrCodeAnimalUpdateDto dto)
@@ -211,6 +277,18 @@ namespace NinjaTurtles.Business.Concrete
             var qrAnimal = _mapper.Map<QrCodeAnimalDetail>(dto);
             _qrCodeAnimalDetailDal.Update(qrAnimal);
             return new Result(true, Messages.QrFilled);
+
+            var qrlog = new QrLog
+            {
+                LogTypeId = 3,
+                QrCodeMainId = qr.Id,
+                IpAddress = "",
+                CreatedDate = DateTime.Now,
+                CreatedBy = 1,
+                IsActive = true,
+
+            };
+            _qrLogDal.Add(qrlog);
             throw new NotImplementedException();
         }
 
@@ -226,23 +304,35 @@ namespace NinjaTurtles.Business.Concrete
 
             if (dto.File != null)
             {
-                var directory = @"D:\vhosts\karekodla.com\UploadFiles\ProfilePictures";
-
+                var directory = @"D:\vhosts\karekodla.com\UploadFiles\";
                 //string directory = _config.GetSection("Directories:FileDirectory").Value;
 
                 CreateFileWithFileNameDto uploadFile = new CreateFileWithFileNameDto()
                 {
                     File = dto.File,
                     FolderPath = directory,
-                    FileName = dto.File.FileName
+                    FileName = qrHuman.FullName + "_" + DateTime.Now.ToShortDateString() + "_" + DateTime.Now.ToShortTimeString() + "_" + dto.File.FileName
                 };
                 var file = WriteFile.CreateFileWithFileName(uploadFile).Data;
-                var oldFile = System.IO.Path.Combine(directory, qrHuman.ProfilePictureUrl);
-                if (System.IO.File.Exists(oldFile))
-                    System.IO.File.Delete(oldFile);
-
-                qrHuman.ProfilePictureUrl = dto.File.Name;
+                if (qrHuman.ProfilePictureUrl != null)
+                {
+                    var oldFile = System.IO.Path.Combine(directory, qrHuman.ProfilePictureUrl);
+                    if (System.IO.File.Exists(oldFile))
+                        System.IO.File.Delete(oldFile);
+                }
+                qrHuman.ProfilePictureUrl = uploadFile.FileName;
             }
+            var qrlog = new QrLog
+            {
+                LogTypeId = 3,
+                QrCodeMainId = qr.Id,
+                IpAddress = "",
+                CreatedDate = DateTime.Now,
+                CreatedBy = 1,
+                IsActive = true,
+
+            };
+            _qrLogDal.Add(qrlog);
             _qrCodeHumanDetailDal.Update(qrHuman);
             return new Result(true, Messages.QrFilled);
 

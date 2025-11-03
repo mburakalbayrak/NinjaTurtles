@@ -44,7 +44,12 @@ namespace NinjaTurtles.Business.Concrete
                 }
 
                 var code = Convert.ToInt32(ProExt.GenerateAccountNumber(null, "6"));
+                MailWorker mail = new MailWorker();
 
+                mail.Init("mail.kurumsaleposta.com", 587, "dogrula@karekodla.com", "F2j@98f:8nE=FhD:", true, false);
+
+                var mailBody = Messages.VerifyMailTemplate.Replace("{{code}}", code.ToString()).Replace("{{displayName}}", $"{hasCustomer.FirstName} {hasCustomer.LastName}").Replace("{{year}}", DateTime.Now.Year.ToString());
+                var result = await mail.SendMailAsync(dto.Email, "dogrula@karekodla.com", "Karekodla", mailBody, "Karekodla – Hesabını Doğrula", true);
                 var customerQr = new CustomerQrVerification
                 {
                     CustomerId = hasCustomer.Id,
@@ -54,12 +59,8 @@ namespace NinjaTurtles.Business.Concrete
                     VerificationTypeId = 1,
                 };
                 _customerQrVerificationDal.Add(customerQr);
-                MailWorker mail = new MailWorker();
 
-                mail.Init("mail.kurumsaleposta.com", 587, "dogrula@karekodla.com.tr", "5Z1Kp3o:Fc_kM=-6", false, false);
-
-                var mailBody = Messages.VerifyMailTemplate.Replace("{{code}}", code.ToString()).Replace("{{displayName}}", $"{hasCustomer.FirstName} {hasCustomer.LastName}").Replace("{{year}}", DateTime.Now.Year.ToString());
-                var result = await mail.SendMailAsync(dto.Email, "dogrula@karekodla.com.tr", "Karekodla", mailBody, "Karekodla – Hesabını Doğrula", true);
+             
                 return new Result(true, returnMessage);
             }
             catch (Exception ex)
@@ -67,7 +68,6 @@ namespace NinjaTurtles.Business.Concrete
                 return new Result(false, ex.Message);
 
             }
-
         }
 
         public IResult Delete(int id)
@@ -89,6 +89,13 @@ namespace NinjaTurtles.Business.Concrete
             if (customer==null)
                 return new Result(false, Messages.UserNotFound);
             var code = Convert.ToInt32(ProExt.GenerateAccountNumber(null, "6"));
+
+            MailWorker mail = new MailWorker();
+
+            mail.Init("mail.kurumsaleposta.com", 587, "dogrula@karekodla.com", "u1:nhT-5I@B76e@M", true, false);
+
+            var mailBody = Messages.VerifyMailTemplate.Replace("{{code}}", code.ToString()).Replace("{{displayName}}", $"{customer.FirstName} {customer.LastName}").Replace("{{year}}", DateTime.Now.Year.ToString());
+            var result = await mail.SendMailAsync(email, "dogrula@karekodla.com", "Karekodla", mailBody, "Karekodla – Hesabını Doğrula", true);
             var customerQr = new CustomerQrVerification
             {
                 CustomerId = customer.Id,
@@ -98,12 +105,7 @@ namespace NinjaTurtles.Business.Concrete
                 VerificationTypeId = 1,
             };
             _customerQrVerificationDal.Add(customerQr);
-            MailWorker mail = new MailWorker();
-
-            mail.Init("mail.kurumsaleposta.com", 587, "dogrula@karekodla.com.tr", "5Z1Kp3o:Fc_kM=-6", false, false);
-
-            var mailBody = Messages.VerifyMailTemplate.Replace("{{code}}", code.ToString()).Replace("{{displayName}}", $"{customer.FirstName} {customer.LastName}").Replace("{{year}}", DateTime.Now.Year.ToString());
-            var result = await mail.SendMailAsync(email, "dogrula@karekodla.com.tr", "Karekodla", mailBody, "Karekodla – Hesabını Doğrula", true);
+            
             return new Result(true, Messages.SendMailCode);
         }
 

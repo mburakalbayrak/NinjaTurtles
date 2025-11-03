@@ -23,53 +23,17 @@ namespace NinjaTurtles.Core.Helpers.MailServices
 
         public void Init(string host, int port, string userName, string password, bool enableSsl, bool useDefaultCredentials)
         {
-            try
+            client = new SmtpClient(host)
             {
-                // İSTENMEZ ama iç ağ/test için gerekiyorsa bırakılabilir:
-                // ServicePointManager.ServerCertificateValidationCallback = (s, cert, chain, errors) => true;
+                Port = port,
+                EnableSsl = enableSsl,              // 587 için STARTTLS
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                Timeout = 100000,
+                UseDefaultCredentials = false
+            };
+            client.Credentials = new NetworkCredential(userName, password); // userName = tam e-posta
+            isInitialized = true;
 
-                client = new SmtpClient(host)
-                {
-                    Port = port,
-                    EnableSsl = enableSsl,
-                    DeliveryMethod = SmtpDeliveryMethod.Network,
-                    Timeout = 100000
-                };
-
-                client.UseDefaultCredentials = useDefaultCredentials;
-
-                if (useDefaultCredentials)
-                {
-                    // On-prem Exchange (NTLM) senaryosu: makine/oturum hesabı ile auth
-                    client.Credentials = CredentialCache.DefaultNetworkCredentials;
-                }
-                else
-                {
-                    // Exchange Online vb: kullanıcı adı/şifre ile auth
-                    // DOMAIN\user gelirse domain'i ayır
-                    string domain = null, user = userName;
-                    int slash = userName.IndexOf('\\');
-                    if (slash >= 0)
-                    {
-                        domain = userName.Substring(0, slash);
-                        user = userName[(slash + 1)..];
-                    }
-
-
-                    credential = domain is null
-                        ? new NetworkCredential(user, password)
-                        : new NetworkCredential(user, password, domain);
-
-                    client.Credentials = credential;
-                }
-
-                isInitialized = true;
-            }
-            catch
-            {
-                isInitialized = false;
-                throw; // en azından loglaman iyi olur
-            }
         }
 
         public bool SendMail(string[] receivers, string sender, string mailContent, string subject, bool isBodyHtml)
@@ -220,7 +184,6 @@ namespace NinjaTurtles.Core.Helpers.MailServices
             if (attachment != null)
                 message.Attachments.Add(attachment);
 
-            message.Bcc.Add("yusuf.celik@seachglobal.com");
             message.Subject = subject;
             message.Body = mailContent;
             message.IsBodyHtml = isBodyHtml;

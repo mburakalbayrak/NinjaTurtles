@@ -167,7 +167,6 @@ namespace NinjaTurtles.Business.Concrete
                     var bytes = File.ReadAllBytes(filePath);
 
                     qrDto.HumanDetail.ProfilePictureData = Convert.ToBase64String(bytes);
-
                     qrDto.HumanDetail.Gender = qrHuman.GenderId != null
                        ? paramList.FirstOrDefault(c => c.Id == qrHuman.GenderId)?.Name : null;
 

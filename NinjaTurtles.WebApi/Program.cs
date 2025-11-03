@@ -115,8 +115,8 @@ if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
 }
-
-//app.UseHttpsRedirection();
+app.UsePathBase("/qrapi");
+app.UseHttpsRedirection();
 
 app.UseRouting();
 

@@ -9,6 +9,8 @@ namespace NinjaTurtles.Entities.Dtos
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int? DetailTypeId { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string? RedirectUrl { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public QrCodeHumanDetailDto? HumanDetail { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public QrCodeAnimalDetailDto? AnimalDetail { get; set; }

@@ -114,6 +114,19 @@ namespace NinjaTurtles.Business.Concrete
             }
         }
 
+        public IResult CreateRedirectUrl(QrRedirectUrlDto dto)
+        {
+            var qr = _qrCodeMainDal.Get(c => c.Id == dto.QrMainId && (!c.IsDeleted && c.IsActive));
+
+            if (qr == null)
+                return new Result(false, message: Messages.DataNotFound);
+            qr.RedirectUrl = dto.RedirectUrl;
+            qr.DetailTypeId = 3;
+            _qrCodeMainDal.Update(qr);
+            return new Result(true, Messages.QrFilled);
+
+        }
+
         public IDataResult<QrCodeAnimalDetailDto> GetAnimalDetailVerify(QrUpdateVerifyDto dto)
         {
             var now = DateTime.Now;
@@ -149,7 +162,7 @@ namespace NinjaTurtles.Business.Concrete
             var qrHuman = _qrCodeHumanDetailDal.Get(c => c.QrMainId == qr.Id);
             if (qrHuman == null)
                 return new ErrorDataResult<QrCodeHumanDetailDto>(null, Messages.DataNotFound);
-           
+
             var paramList = _paramItemDal.GetList();
             var qrDto = _mapper.Map<QrCodeHumanDetailDto>(qrHuman);
 
@@ -255,6 +268,9 @@ namespace NinjaTurtles.Business.Concrete
                     case 2:
                         var qrAnimal = _qrCodeAnimalDetailDal.Get(c => c.QrMainId == qr.Id);
                         qrDto.AnimalDetail = _mapper.Map<QrCodeAnimalDetailDto>(qrAnimal);
+                        break;
+                    case 3:
+                        qrDto.RedirectUrl = qr.RedirectUrl;
                         break;
                 }
 

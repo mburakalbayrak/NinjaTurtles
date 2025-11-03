@@ -88,7 +88,7 @@ namespace NinjaTurtles.Business.Concrete
                     qrcodeMain.Id = guid;
                     qrcodeMain.CompanyOrderDetailId = cod.Id;
                     qrcodeMain.ImageUrl = filePath;
-                    qrcodeMain.RedirectUrl = url;
+                    qrcodeMain.QrUrl = url;
                     qrcodeMain.CreatedDate = DateTime.Now;
                     qrcodeMain.IsActive = true;
                     _qrCodeMainDal.Add(qrcodeMain);

@@ -65,7 +65,7 @@ namespace NinjaTurtles.Business.Concrete
                 var company = _company.Get(c => c.Id == cod.CompanyOrderId);
 
                 var companyOrderCount = _companyOrderDetail.GetList(c => c.CompanyOrderId == cod.CompanyOrderId && c.IsActive).Count();
-                string directory = Path.Combine(@"D:\vhosts\karekodla.com\UploadFiles\QrCode",company.Name,cod.Id.ToString());
+                string directory = Path.Combine(@"D:\vhosts\karekodla.com\UploadFiles\QrCode", company.Name, cod.Id.ToString());
                 DirectoryInfo di = Directory.CreateDirectory(directory);
 
                 var url = "https://www.karekodla.com/Qr/?id=";
@@ -75,10 +75,10 @@ namespace NinjaTurtles.Business.Concrete
                     var filePath = $"{directory}/{company.ShortName}#{companyOrderCount}#{i}.png";
                     var barcodeContent = url + guid;
 
-
+                    var labelText = $"{company.ShortName}#{companyOrderCount}#{i}";
                     var saved = await QRCodeHelper.GenerateQrWithLabelAsync(
     content: barcodeContent,
-    labelText: $"{company.ShortName}#{companyOrderCount}#{i}",
+    labelText: labelText,
     savePath: filePath,
     position: QRCodeHelper.LabelPosition.Bottom,
     pixelsPerModule: 20,
@@ -88,7 +88,8 @@ namespace NinjaTurtles.Business.Concrete
                     qrcodeMain.Id = guid;
                     qrcodeMain.CompanyOrderDetailId = cod.Id;
                     qrcodeMain.ImageUrl = filePath;
-                    qrcodeMain.QrUrl = url;
+                    qrcodeMain.SerialNumber = labelText;
+                    qrcodeMain.QrUrl = barcodeContent;
                     qrcodeMain.CreatedDate = DateTime.Now;
                     qrcodeMain.IsActive = true;
                     _qrCodeMainDal.Add(qrcodeMain);

@@ -26,7 +26,7 @@ namespace NinjaTurtles.Core.Helpers.MailServices
             client = new SmtpClient("mail.kurumsaleposta.com")
             {
                 Port = 587,
-                EnableSsl = true,              // 587 için STARTTLS
+                EnableSsl = false,              // 587 için STARTTLS
                 DeliveryMethod = SmtpDeliveryMethod.Network,
                 Timeout = 100000,
                 UseDefaultCredentials = false

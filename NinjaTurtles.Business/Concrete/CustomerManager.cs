@@ -46,10 +46,10 @@ namespace NinjaTurtles.Business.Concrete
                 var code = Convert.ToInt32(ProExt.GenerateAccountNumber(null, "6"));
                 MailWorker mail = new MailWorker();
 
-                mail.Init("mail.kurumsaleposta.com", 587, "dogrula@karekodla.com", "F2j@98f:8nE=FhD:", true, false);
+                mail.Init(StaticVars.VerifyMailUserName, StaticVars.VerifyMailPassword);
 
                 var mailBody = Messages.VerifyMailTemplate.Replace("{{code}}", code.ToString()).Replace("{{displayName}}", $"{hasCustomer.FirstName} {hasCustomer.LastName}").Replace("{{year}}", DateTime.Now.Year.ToString());
-                var result = await mail.SendMailAsync(dto.Email, "dogrula@karekodla.com", "Karekodla", mailBody, "Karekodla – Hesabını Doğrula", true);
+                var result = await mail.SendMailAsync(dto.Email, StaticVars.VerifyMailUserName, "Karekodla", mailBody, "Karekodla – Hesabını Doğrula", true);
                 var customerQr = new CustomerQrVerification
                 {
                     CustomerId = hasCustomer.Id,
@@ -92,10 +92,10 @@ namespace NinjaTurtles.Business.Concrete
 
             MailWorker mail = new MailWorker();
 
-            mail.Init("mail.kurumsaleposta.com", 587, "dogrula@karekodla.com", "u1:nhT-5I@B76e@M", true, false);
+            mail.Init(StaticVars.VerifyMailUserName, StaticVars.VerifyMailPassword);
 
             var mailBody = Messages.VerifyMailTemplate.Replace("{{code}}", code.ToString()).Replace("{{displayName}}", $"{customer.FirstName} {customer.LastName}").Replace("{{year}}", DateTime.Now.Year.ToString());
-            var result = await mail.SendMailAsync(email, "dogrula@karekodla.com", "Karekodla", mailBody, "Karekodla – Hesabını Doğrula", true);
+            var result = await mail.SendMailAsync(email, StaticVars.VerifyMailUserName, "Karekodla", mailBody, "Karekodla – Hesabını Doğrula", true);
             var customerQr = new CustomerQrVerification
             {
                 CustomerId = customer.Id,

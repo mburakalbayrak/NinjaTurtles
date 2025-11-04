@@ -25,6 +25,13 @@ namespace NinjaTurtles.WebApi.Controllers
 
 
         [HttpPost("[action]")]
+        public IActionResult CreateRedirectUrl([FromBody] QrRedirectUrlDto dto)
+        {
+            var result = _qrService.CreateRedirectUrl(dto);
+            return Ok(result);
+        }
+
+        [HttpPost("[action]")]
         public IActionResult CreateHumanDetail([FromForm] QrCodeHumanCreateDto dto)
         {
             var result = _qrService.CreateHumanDetail(dto);

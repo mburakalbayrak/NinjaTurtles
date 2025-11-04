@@ -21,12 +21,12 @@ namespace NinjaTurtles.Core.Helpers.MailServices
         #region Methods
 
 
-        public void Init(string host, int port, string userName, string password, bool enableSsl, bool useDefaultCredentials)
+        public void Init(string userName, string password)
         {
-            client = new SmtpClient(host)
+            client = new SmtpClient("mail.kurumsaleposta.com")
             {
-                Port = port,
-                EnableSsl = enableSsl,              // 587 için STARTTLS
+                Port = 587,
+                EnableSsl = true,              // 587 için STARTTLS
                 DeliveryMethod = SmtpDeliveryMethod.Network,
                 Timeout = 100000,
                 UseDefaultCredentials = false

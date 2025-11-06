@@ -129,6 +129,7 @@ namespace NinjaTurtles.Business.Concrete
             if (qr == null)
                 return new Result(false, message: Messages.DataNotFound);
             qr.RedirectUrl = dto.RedirectUrl;
+            qr.CustomerId = dto.CustomerId;
             qr.DetailTypeId = 3;
             _qrCodeMainDal.Update(qr);
             string clientIp = GetClientIp();

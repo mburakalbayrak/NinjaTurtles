@@ -16,26 +16,26 @@ namespace NinjaTurtles.Business.DependencyResolvers.Autofac
             // Burayı bilerek yorum satırına aldık. Canlı api 500 alıyordu bundan kaynaklı olabilir
             //builder.RegisterType<AutoMapperProfiles>().As<Profile>();   
 
-            builder.RegisterType<EfProductDal>().As<IProductDal>();
-            builder.RegisterType<EfCustomerDal>().As<ICustomerDal>();
-            builder.RegisterType<EfCustomerQrVerificationDal>().As<ICustomerQrVerificationDal>();
-            builder.RegisterType<EfParamItemDal>().As<IParamItemDal>();
-            builder.RegisterType<EfCompanyDal>().As<ICompanyDal>();
-            builder.RegisterType<EfCompanyOrderDetailDal>().As<ICompanyOrderDetailDal>();
-            builder.RegisterType<EfQrCodeMainDal>().As<IQrCodeMainDal>();
-            builder.RegisterType<EfQrCodeHumanDetailDal>().As<IQrCodeHumanDetailDal>();
-            builder.RegisterType<EfQrCodeAnimalDetailDal>().As<IQrCodeAnimalDetailDal>();
-            builder.RegisterType<EfQrLogDal>().As<IQrLogDal>();
-            builder.RegisterType<EfUserDal>().As<IUserDal>();
+            builder.RegisterType<EfProductDal>().As<IProductDal>().InstancePerLifetimeScope();
+            builder.RegisterType<EfCustomerDal>().As<ICustomerDal>().InstancePerLifetimeScope();
+            builder.RegisterType<EfCustomerQrVerificationDal>().As<ICustomerQrVerificationDal>().InstancePerLifetimeScope();
+            builder.RegisterType<EfParamItemDal>().As<IParamItemDal>().InstancePerLifetimeScope();
+            builder.RegisterType<EfCompanyDal>().As<ICompanyDal>().InstancePerLifetimeScope();
+            builder.RegisterType<EfCompanyOrderDetailDal>().As<ICompanyOrderDetailDal>().InstancePerLifetimeScope();
+            builder.RegisterType<EfQrCodeMainDal>().As<IQrCodeMainDal>().InstancePerLifetimeScope();
+            builder.RegisterType<EfQrCodeHumanDetailDal>().As<IQrCodeHumanDetailDal>().InstancePerLifetimeScope();
+            builder.RegisterType<EfQrCodeAnimalDetailDal>().As<IQrCodeAnimalDetailDal>().InstancePerLifetimeScope();
+            builder.RegisterType<EfQrLogDal>().As<IQrLogDal>().InstancePerLifetimeScope();
+            builder.RegisterType<EfUserDal>().As<IUserDal>().InstancePerLifetimeScope();
 
-            builder.RegisterType<QrManager>().As<IQrService>();
-            builder.RegisterType<CustomerManager>().As<ICustomerService>();
-            builder.RegisterType<CompanyManager>().As<ICompanyService>();
-            builder.RegisterType<ProductManager>().As<IProductService>();
-            builder.RegisterType<ParamManager>().As<IParamService>();
-            builder.RegisterType<UserManager>().As<IUserService>();
-            builder.RegisterType<AuthManager>().As<IAuthService>();
-            builder.RegisterType<JwtHelper>().As<ITokenHelper>();
+            builder.RegisterType<QrManager>().As<IQrService>().InstancePerLifetimeScope();
+            builder.RegisterType<CustomerManager>().As<ICustomerService>().InstancePerLifetimeScope();
+            builder.RegisterType<CompanyManager>().As<ICompanyService>().InstancePerLifetimeScope();
+            builder.RegisterType<ProductManager>().As<IProductService>().InstancePerLifetimeScope();
+            builder.RegisterType<ParamManager>().As<IParamService>().InstancePerLifetimeScope();
+            builder.RegisterType<UserManager>().As<IUserService>().InstancePerLifetimeScope();
+            builder.RegisterType<AuthManager>().As<IAuthService>().InstancePerLifetimeScope();
+            builder.RegisterType<JwtHelper>().As<ITokenHelper>().InstancePerLifetimeScope();
 
             builder.RegisterType<HttpContextAccessor>()
          .As<IHttpContextAccessor>()

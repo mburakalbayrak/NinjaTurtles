@@ -54,12 +54,13 @@ namespace NinjaTurtles.Business.Concrete
             qr.CustomerId = dto.CustomerId;
             _qrCodeAnimalDetailDal.Add(qrAnimal);
             _qrCodeMainDal.Update(qr);
+            string clientIp = GetClientIp();
 
             var qrlog = new QrLog
             {
                 LogTypeId = 2,
                 QrCodeMainId = qr.Id,
-                IpAddress = "",
+                IpAddress = clientIp,
                 CreatedDate = DateTime.Now,
                 CreatedBy = 1,
                 IsActive = true,
@@ -100,12 +101,13 @@ namespace NinjaTurtles.Business.Concrete
                 _qrCodeHumanDetailDal.Add(qrHuman);
                 _qrCodeMainDal.Update(qr);
 
+                string clientIp = GetClientIp();
 
                 var qrlog = new QrLog
                 {
                     LogTypeId = 2,
                     QrCodeMainId = qr.Id,
-                    IpAddress = "",
+                    IpAddress = clientIp,
                     CreatedDate = DateTime.Now,
                     CreatedBy = 1,
                     IsActive = true,
@@ -129,6 +131,19 @@ namespace NinjaTurtles.Business.Concrete
             qr.RedirectUrl = dto.RedirectUrl;
             qr.DetailTypeId = 3;
             _qrCodeMainDal.Update(qr);
+            string clientIp = GetClientIp();
+
+            var qrlog = new QrLog
+            {
+                LogTypeId = 2,
+                QrCodeMainId = qr.Id,
+                IpAddress = clientIp,
+                CreatedDate = DateTime.Now,
+                CreatedBy = 1,
+                IsActive = true,
+
+            };
+            _qrLogDal.Add(qrlog);
             return new Result(true, Messages.QrFilled);
 
         }
@@ -261,17 +276,33 @@ namespace NinjaTurtles.Business.Concrete
                 var customer = _customerDal.Get(c => c.Id == qr.CustomerId);
 
                 // ------------------ EKLENEN: basit IP -> konum + zaman ve mapUrl ------------------
-                // Istanbul saati formatı
+                // ... mevcut kodun içinde, customer'ı aldıktan hemen ÖNCE/SONRA uygun yere ekle:
+
+                // Istanbul saati
                 var trTz = TimeZoneInfo.FindSystemTimeZoneById("Europe/Istanbul");
                 var nowTr = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, trTz);
                 var scanTime = nowTr.ToString("d MMMM yyyy HH:mm", new System.Globalization.CultureInfo("tr-TR"));
 
+                // 1) Header'lardan lat/lng almaya çalış
+                double? headerLat = TryGetDoubleHeader("X-Geo-Lat");
+                double? headerLng = TryGetDoubleHeader("X-Geo-Lng");
 
-                // Şehir/İlçe/Ülke ve (varsa) lat/lng -> Harita linki
+                // 2) Varsayılan: IP'den şehir/ilçe/ülke (+ yaklaşık lat/lng varsa harita)
                 string city = "", district = "", country = "", mapUrl = "";
+                clientIp = GetClientIp();
+
                 try
                 {
-                    if (!string.IsNullOrWhiteSpace(clientIp))
+                    if (headerLat.HasValue && headerLng.HasValue)
+                    {
+                        // Kesin konumdan direkt harita linki
+                        mapUrl = $"https://maps.google.com/?q={headerLat.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)},{headerLng.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+
+                        // (OPSİYONEL) Lat/Lng -> Şehir-İlçe ters geocode (Nominatim).
+                        // Minimal: 2 sn timeout, User-Agent zorunlu.
+                        (city, district, country) = await ReverseGeocodeAsync(headerLat.Value, headerLng.Value);
+                    }
+                    else if (!string.IsNullOrWhiteSpace(clientIp))
                     {
                         using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
                         var resp = await http.GetAsync($"https://ipapi.co/{clientIp}/json/");
@@ -280,7 +311,7 @@ namespace NinjaTurtles.Business.Concrete
                             using var s = await resp.Content.ReadAsStreamAsync();
                             using var doc = await System.Text.Json.JsonDocument.ParseAsync(s);
                             city = doc.RootElement.TryGetProperty("city", out var c) ? c.GetString() ?? "" : "";
-                            district = doc.RootElement.TryGetProperty("region", out var r) ? r.GetString() ?? "" : ""; // İl/İlçe benzeri
+                            district = doc.RootElement.TryGetProperty("region", out var r) ? r.GetString() ?? "" : "";
                             country = doc.RootElement.TryGetProperty("country_name", out var co) ? co.GetString() ?? "" : "";
 
                             if (doc.RootElement.TryGetProperty("latitude", out var la) &&
@@ -292,16 +323,15 @@ namespace NinjaTurtles.Business.Concrete
                         }
                     }
                 }
-                catch { /* jeo konum alınamazsa boş bırak */ }
+                catch { /* sessiz geç */ }
 
-                // ------------------ ŞABLON REPLACE ------------------
-                // Not: Mail gönderme KISMINA DOKUNMUYORUZ. Sadece template parametrelerini dolduruyoruz.
+                // ---- ŞABLON REPLACE (mail kısmına dokunmadan, body'yi hazırlıyoruz) ----
                 var tpl = Messages.QrReadNotificationMailTemplate
                     .Replace("{{ownerName}}", $"{customer.FirstName} {customer.LastName}")
                     .Replace("{{scanTime}}", scanTime)
                     .Replace("{{city}}", city)
                     .Replace("{{district}}", district)
-                    .Replace("{{mapUrl}}", mapUrl) // boş kalırsa buton boş href olur; istersen şablonda koşullu render yapabilirsin.
+                    .Replace("{{mapUrl}}", mapUrl)
                     .Replace("{{year}}", DateTime.Now.Year.ToString())
                     .Replace("{{securityUrl}}", "https://karekodla.com/security")
                     .Replace("{{helpUrl}}", "https://karekodla.com/help");
@@ -356,6 +386,69 @@ namespace NinjaTurtles.Business.Concrete
             }
         }
 
+        double? TryGetDoubleHeader(string headerName)
+        {
+            try
+            {
+                var ctx = _httpContextAccessor?.HttpContext;
+                if (ctx == null) return null;
+                if (!ctx.Request.Headers.TryGetValue(headerName, out var values)) return null;
+                var s = values.ToString();
+                if (double.TryParse(s, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var d))
+                    return d;
+                return null;
+            }
+            catch { return null; }
+        }
+
+        string GetClientIp()
+        {
+            try
+            {
+                var ctx = _httpContextAccessor?.HttpContext;
+                if (ctx == null) return "";
+                var cf = ctx.Request.Headers["CF-Connecting-IP"].ToString();
+                if (System.Net.IPAddress.TryParse(cf, out _)) return cf;
+
+                var xff = ctx.Request.Headers["X-Forwarded-For"].ToString();
+                if (!string.IsNullOrWhiteSpace(xff))
+                {
+                    var ip = xff.Split(',').Select(s => s.Trim()).FirstOrDefault();
+                    if (System.Net.IPAddress.TryParse(ip, out _)) return ip!;
+                }
+
+                var xri = ctx.Request.Headers["X-Real-IP"].ToString();
+                if (System.Net.IPAddress.TryParse(xri, out _)) return xri;
+
+                return ctx.Connection.RemoteIpAddress?.ToString() ?? "";
+            }
+            catch { return ""; }
+        }
+
+        // OPSİYONEL: ters geocode ile şehir/ilçe/ülke
+        async Task<(string city, string district, string country)> ReverseGeocodeAsync(double lat, double lng)
+        {
+            try
+            {
+                using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
+                var url = $"https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat={lat.ToString(System.Globalization.CultureInfo.InvariantCulture)}&lon={lng.ToString(System.Globalization.CultureInfo.InvariantCulture)}&addressdetails=1";
+                using var req = new HttpRequestMessage(HttpMethod.Get, url);
+                req.Headers.UserAgent.ParseAdd("karekodla/1.0"); // Nominatim zorunlu
+                using var resp = await http.SendAsync(req);
+                if (!resp.IsSuccessStatusCode) return ("", "", "");
+                using var s = await resp.Content.ReadAsStreamAsync();
+                using var doc = await System.Text.Json.JsonDocument.ParseAsync(s);
+                if (!doc.RootElement.TryGetProperty("address", out var addr)) return ("", "", "");
+                string city = addr.TryGetProperty("city", out var c) ? c.GetString() ?? "" :
+                              addr.TryGetProperty("town", out var t) ? t.GetString() ?? "" :
+                              addr.TryGetProperty("village", out var v) ? v.GetString() ?? "" : "";
+                string district = addr.TryGetProperty("suburb", out var sb) ? sb.GetString() ?? "" :
+                                  addr.TryGetProperty("district", out var d) ? d.GetString() ?? "" : "";
+                string country = addr.TryGetProperty("country", out var co) ? co.GetString() ?? "" : "";
+                return (city, district, country);
+            }
+            catch { return ("", "", ""); }
+        }
 
         public IResult UpdateAnimalDetail(QrCodeAnimalUpdateDto dto)
         {
@@ -370,20 +463,22 @@ namespace NinjaTurtles.Business.Concrete
             _qrCodeMainDal.Update(qr);
             var qrAnimal = _mapper.Map(dto, qrAnimalData);
             _qrCodeAnimalDetailDal.Update(qrAnimal);
-            return new Result(true, Messages.QrFilled);
 
+            string ipAddress = GetClientIp();
             var qrlog = new QrLog
             {
                 LogTypeId = 3,
                 QrCodeMainId = qr.Id,
-                IpAddress = "",
+                IpAddress = ipAddress,
                 CreatedDate = DateTime.Now,
                 CreatedBy = 1,
                 IsActive = true,
 
             };
             _qrLogDal.Add(qrlog);
-            throw new NotImplementedException();
+            return new Result(true, Messages.QrFilled);
+
+          
         }
 
         public IResult UpdateHumanDetail(QrCodeHumanUpdateDto dto)
@@ -391,10 +486,10 @@ namespace NinjaTurtles.Business.Concrete
             var qr = _qrCodeMainDal.Get(c => c.Id == dto.QrMainId && (!c.IsDeleted && c.IsActive));
             if (qr == null)
                 return new ErrorDataResult<QrCodeHumanUpdateDto>(data: null, message: Messages.DataNotFound);
-            var qrHumanData = _qrCodeHumanDetailDal.Get(c => c.Id == dto.Id && dto.QrMainId== dto.QrMainId);
+            var qrHumanData = _qrCodeHumanDetailDal.Get(c => c.Id == dto.Id && dto.QrMainId == dto.QrMainId);
             qr.DetailTypeId = 1;
             _qrCodeMainDal.Update(qr);
-            var qrHuman = _mapper.Map(dto,qrHumanData);
+            var qrHuman = _mapper.Map(dto, qrHumanData);
             qrHuman.ModifiedBy = 1;
             qrHuman.ModifiedDate = DateTime.Now;
             if (dto.File != null)
@@ -417,11 +512,13 @@ namespace NinjaTurtles.Business.Concrete
                 }
                 qrHuman.ProfilePictureUrl = uploadFile.FileName;
             }
+            string ipAddress = GetClientIp();
+
             var qrlog = new QrLog
             {
                 LogTypeId = 3,
                 QrCodeMainId = qr.Id,
-                IpAddress = "",
+                IpAddress = ipAddress,
                 CreatedDate = DateTime.Now,
                 CreatedBy = 1,
                 IsActive = true,
@@ -448,6 +545,18 @@ namespace NinjaTurtles.Business.Concrete
             qr.ModifiedBy = 1;
             qr.RedirectUrl = dto.RedirectUrl;
             _qrCodeMainDal.Update(qr);
+
+            string ipAddress = GetClientIp();
+
+            var qrlog = new QrLog
+            {
+                LogTypeId = 3,
+                QrCodeMainId = qr.Id,
+                IpAddress = ipAddress,
+                CreatedDate = DateTime.Now,
+                CreatedBy = 1,
+                IsActive = true,
+            };
             return new Result(true, Messages.QrFilled);
 
         }

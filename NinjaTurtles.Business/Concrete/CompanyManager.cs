@@ -82,7 +82,7 @@ namespace NinjaTurtles.Business.Concrete
     savePath: filePath,
     position: QRCodeHelper.LabelPosition.Bottom,
     pixelsPerModule: 20,
-    fontFilePath: null // istersen TTF dosya yolu ver
+    fontFilePath: null
 );
                     var qrcodeMain = new QrCodeMain();
                     qrcodeMain.Id = guid;

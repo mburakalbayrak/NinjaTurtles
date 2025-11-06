@@ -12,28 +12,33 @@ namespace NinjaTurtles.Core.Helpers.QrCodeGeneratator
         public enum LabelPosition { Top, Bottom }
 
         public static async Task<string> GenerateQrWithLabelAsync(
-            string content,
-            string labelText,
-            string savePath,
-            LabelPosition position = LabelPosition.Bottom,
-            int pixelsPerModule = 20,
-            int margin = 10,
-            string? fontFilePath = null,
-            float initialFontSize = 24f,
-            float minFontSize = 10f)
+         string content,
+         string labelText,
+         string savePath,
+         string colorCode ="",
+         LabelPosition position = LabelPosition.Bottom,
+         int pixelsPerModule = 20,
+         int margin = 10,
+         string? fontFilePath = null,
+         float initialFontSize = 24f,
+         float minFontSize = 10f,
+         int quietZoneModules = 1 // <-- eklendi
+     )
         {
-            // QR üret
+            // 1) QR üret (açık modüller saydam kalsın; quiet zone'u biz beyaz dolduracağız)
             using var qrGen = new QRCodeGenerator();
             using var qrData = qrGen.CreateQrCode(content, QRCodeGenerator.ECCLevel.Q);
             var pngQr = new PngByteQRCode(qrData);
             byte[] qrPngBytes = pngQr.GetGraphic(
-    pixelsPerModule: 20,
-     darkColorRgba: new byte[] { 0, 0, 0, 255 },     
-    lightColorRgba: new byte[] { 255, 255, 255, 0 }, 
-    drawQuietZones: false);
+            pixelsPerModule: pixelsPerModule,
+                darkColorRgba: RgbaBytes("#089E6E"),      // siyah
+                lightColorRgba: RgbaBytes("#FFFF"), // saydam
+                drawQuietZones: false
+            );
+
             using Image<Rgba32> qrImg = Image.Load<Rgba32>(qrPngBytes);
 
-            // Font seçimi (TryGet + fallback)
+            // 2) Font seçimi
             FontCollection fc = new();
             FontFamily family;
             if (!string.IsNullOrWhiteSpace(fontFilePath) && File.Exists(fontFilePath))
@@ -43,12 +48,17 @@ namespace NinjaTurtles.Core.Helpers.QrCodeGeneratator
             else
                 family = SystemFonts.Families.First();
 
-            // Metni ölç – MeasureSize -> FontRectangle
-            float availableWidth = qrImg.Width - (margin * 2);
+            // 3) Quiet zone ve final boyutlar
+            int qzPx = Math.Max(0, quietZoneModules) * pixelsPerModule;
+            int qrAreaSize = qrImg.Width + (qzPx * 2); // kare alan (quiet zone dahil)
+
+            // Etiketi ölçmeden önce final genişliği bilmek iyi olur
+            float availableWidth = qrAreaSize - (margin * 2);
+
+            // 4) Etiket ölçümü
             float currentSize = initialFontSize;
             Font fitFont = new Font(family, currentSize, FontStyle.Regular);
             FontRectangle rect;
-
             do
             {
                 fitFont = new Font(family, currentSize, FontStyle.Regular);
@@ -58,28 +68,50 @@ namespace NinjaTurtles.Core.Helpers.QrCodeGeneratator
             } while (currentSize >= minFontSize);
 
             int textBlockHeight = (int)Math.Ceiling(rect.Height) + (margin * 2);
-            int finalW = qrImg.Width;
-            int finalH = qrImg.Height + textBlockHeight;
+            int finalW = qrAreaSize;
+            int finalH = qrAreaSize + textBlockHeight;
 
             using Image<Rgba32> finalImg = new(finalW, finalH, Color.White);
 
-            // Çizim
+            // 5) Çizim
             int qrY = position == LabelPosition.Top ? textBlockHeight : 0;
+
             finalImg.Mutate(ctx =>
             {
-                ctx.DrawImage(qrImg, new Point(0, qrY), 1f);
+                // Quiet zone alanını beyaz doldur (standart gereği)
+                var qrAreaRect = new Rectangle(0, qrY, qrAreaSize, qrAreaSize);
+                ctx.Fill(Color.White, qrAreaRect);
 
-                int textY = position == LabelPosition.Top ? 0 : qrImg.Height;
+                // QR’ı quiet zone içine yerleştir (saydam açık modüller sayesinde beyaz boşluk korunur)
+                var qrTopLeft = new Point(qzPx, qrY + qzPx);
+                ctx.DrawImage(qrImg, qrTopLeft, 1f);
+
+                // Etiket
+                int textY = position == LabelPosition.Top ? 0 : qrAreaSize;
                 float textX = (finalW - rect.Width) / 2f;
                 float baselineY = textY + (textBlockHeight - rect.Height) / 2f;
-
-                // Doğru overload: text, font, color, location
                 ctx.DrawText(labelText, fitFont, Color.Black, new PointF(textX, baselineY));
             });
 
-            Directory.CreateDirectory(Path.GetDirectoryName(savePath)!);
+            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(savePath)!);
             await finalImg.SaveAsync(savePath);
             return savePath;
         }
+
+        static byte[] RgbaBytes(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) throw new ArgumentException(nameof(s));
+            var h = s.Trim().TrimStart('#');
+            byte X(char c) { int v = int.Parse(c.ToString(), System.Globalization.NumberStyles.HexNumber); return (byte)((v << 4) | v); }
+
+            byte r, g, b, a;
+            if (h.Length == 3) { r = X(h[0]); g = X(h[1]); b = X(h[2]); a = 255; }
+            else if (h.Length == 4) { r = X(h[0]); g = X(h[1]); b = X(h[2]); a = X(h[3]); }
+            else if (h.Length == 6) { r = Convert.ToByte(h.Substring(0, 2), 16); g = Convert.ToByte(h.Substring(2, 2), 16); b = Convert.ToByte(h.Substring(4, 2), 16); a = 255; }
+            else if (h.Length == 8) { r = Convert.ToByte(h.Substring(0, 2), 16); g = Convert.ToByte(h.Substring(2, 2), 16); b = Convert.ToByte(h.Substring(4, 2), 16); a = Convert.ToByte(h.Substring(6, 2), 16); }
+            else throw new ArgumentException("Geçersiz hex uzunluğu.");
+            return new[] { r, g, b, a };
+        }
     }
+
 }

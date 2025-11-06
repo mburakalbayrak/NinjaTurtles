@@ -13,7 +13,8 @@ namespace NinjaTurtles.Business.DependencyResolvers.Autofac
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<AutoMapperProfiles>().As<Profile>();
+            // Burayı bilerek yorum satırına aldık. Canlı api 500 alıyordu bundan kaynaklı olabilir
+            //builder.RegisterType<AutoMapperProfiles>().As<Profile>();   
 
             builder.RegisterType<EfProductDal>().As<IProductDal>();
             builder.RegisterType<EfCustomerDal>().As<ICustomerDal>();

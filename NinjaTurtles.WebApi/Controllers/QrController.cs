@@ -2,6 +2,7 @@
 using NinjaTurtles.Business.Abstract;
 using NinjaTurtles.Core.Helpers.MailServices;
 using NinjaTurtles.Entities.Dtos;
+using System.Threading.Tasks;
 
 namespace NinjaTurtles.WebApi.Controllers
 {
@@ -17,9 +18,9 @@ namespace NinjaTurtles.WebApi.Controllers
         }
 
         [HttpGet("[action]")]
-        public IActionResult GetQrDetail(Guid id)
+        public async Task<IActionResult> GetQrDetail(Guid id)
         {
-            var qr = _qrService.GetQrDetail(id);
+            var qr = await _qrService.GetQrDetail(id);
             return Ok(qr);
         }
 
@@ -58,6 +59,14 @@ namespace NinjaTurtles.WebApi.Controllers
             var qr = _qrService.GetAnimalDetailVerify(dto);
             return Ok(qr);
         }
+
+        [HttpPost("[action]")]
+        public IActionResult UpdateRedirectUrl([FromForm] QrRedirectUrlUpdateDto dto)
+        {
+            var result = _qrService.UpdateRedirectUrl(dto);
+            return Ok(result);
+        }
+
         [HttpPost("[action]")]
         public IActionResult UpdateHumanDetail([FromForm] QrCodeHumanUpdateDto dto)
         {

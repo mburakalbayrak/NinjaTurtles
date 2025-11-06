@@ -3,14 +3,20 @@ using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using NinjaTurtles.Business.DependencyResolvers.Autofac;
+using NinjaTurtles.Core.DependencyResolver;
+using NinjaTurtles.Core.Extensions;
 using NinjaTurtles.Core.NetCoreConfiguration;
+using NinjaTurtles.Core.Utilities.IoC;
 using NinjaTurtles.Core.Utilities.Security.Enctyption;
 using NinjaTurtles.Core.Utilities.Security.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
-
+builder.Services.AddDependencyResolvers(new ICoreModule[]
+{
+    new CoreModule(),
+});
 builder.Host.ConfigureContainer<ContainerBuilder>(builder =>
 {
     builder.RegisterModule(new AutofacBusinessModule());
@@ -109,7 +115,7 @@ var app = builder.Build();
 
 //app.UseCors(builder => builder.WithOrigins("http://localhost:44368").AllowAnyHeader());
 
-
+    
 
 if (app.Environment.IsDevelopment())
 {

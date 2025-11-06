@@ -2,6 +2,7 @@
 {
     public class QrCodeAnimalUpdateDto
     {
+        public int Id { get; set; }
         public Guid QrMainId { get; set; }
         public int CustomerId { get; set; }
         public string OwnerName { get; set; } // Sahip Adı

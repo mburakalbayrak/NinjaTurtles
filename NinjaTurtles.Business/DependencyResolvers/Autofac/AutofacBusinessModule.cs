@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using NinjaTurtles.Business.Abstract;
 using NinjaTurtles.Business.Concrete;
 using NinjaTurtles.Core.Utilities.Security.Jwt;
@@ -35,6 +36,9 @@ namespace NinjaTurtles.Business.DependencyResolvers.Autofac
             builder.RegisterType<AuthManager>().As<IAuthService>();
             builder.RegisterType<JwtHelper>().As<ITokenHelper>();
 
+            builder.RegisterType<HttpContextAccessor>()
+         .As<IHttpContextAccessor>()
+         .SingleInstance();
             builder.Register(ctx => new MapperConfiguration(cfg =>
             {
                 cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies());

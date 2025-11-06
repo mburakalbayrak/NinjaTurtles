@@ -4,12 +4,14 @@ using Microsoft.Extensions.Configuration;
 using NinjaTurtles.Business.Abstract;
 using NinjaTurtles.Business.Constants;
 using NinjaTurtles.Core.DataAccess.Concrete.Dto;
-using NinjaTurtles.Core.Entities;
 using NinjaTurtles.Core.Helpers.FileUpload;
+using NinjaTurtles.Core.Helpers.MailServices;
 using NinjaTurtles.Core.Utilities.Results;
 using NinjaTurtles.DataAccess.Abstract;
 using NinjaTurtles.Entities.Concrete;
 using NinjaTurtles.Entities.Dtos;
+using System.Net;
+using static QRCoder.PayloadGenerator;
 
 namespace NinjaTurtles.Business.Concrete
 {
@@ -18,17 +20,21 @@ namespace NinjaTurtles.Business.Concrete
         private IQrCodeMainDal _qrCodeMainDal;
         private IQrCodeHumanDetailDal _qrCodeHumanDetailDal;
         private IQrCodeAnimalDetailDal _qrCodeAnimalDetailDal;
+        private ICustomerDal _customerDal;
+        private IHttpContextAccessor _httpContextAccessor;
         private ICustomerQrVerificationDal _customerQrVerificationDal;
         private IQrLogDal _qrLogDal;
         private IParamItemDal _paramItemDal;
         private IConfiguration _config;
         private IMapper _mapper;
 
-        public QrManager(IQrCodeMainDal qrCodeMainDal, IQrCodeHumanDetailDal qrCodeHumanDetailDal, IQrCodeAnimalDetailDal qrCodeAnimalDetailDal, ICustomerQrVerificationDal customerQrVerificationDal, IQrLogDal qrLogDal, IParamItemDal paramItemDal, IConfiguration config, IMapper mapper)
+        public QrManager(IQrCodeMainDal qrCodeMainDal, IQrCodeHumanDetailDal qrCodeHumanDetailDal, IQrCodeAnimalDetailDal qrCodeAnimalDetailDal, ICustomerDal customerDal, IHttpContextAccessor httpContextAccessor, ICustomerQrVerificationDal customerQrVerificationDal, IQrLogDal qrLogDal, IParamItemDal paramItemDal, IConfiguration config, IMapper mapper)
         {
             _qrCodeMainDal = qrCodeMainDal;
             _qrCodeHumanDetailDal = qrCodeHumanDetailDal;
             _qrCodeAnimalDetailDal = qrCodeAnimalDetailDal;
+            _customerDal = customerDal;
+            _httpContextAccessor = httpContextAccessor;
             _customerQrVerificationDal = customerQrVerificationDal;
             _qrLogDal = qrLogDal;
             _paramItemDal = paramItemDal;
@@ -188,8 +194,7 @@ namespace NinjaTurtles.Business.Concrete
 
             return new SuccessDataResult<QrCodeHumanDetailDto>(qrDto, Messages.AccountVerifySuccess);
         }
-
-        public IDataResult<QrCodeDetailDto> GetQrDetail(Guid id)
+        public async Task<IDataResult<QrCodeDetailDto>> GetQrDetail(Guid id)
         {
             try
             {
@@ -198,38 +203,34 @@ namespace NinjaTurtles.Business.Concrete
                     return new ErrorDataResult<QrCodeDetailDto>(null, Messages.DataNotFound);
 
 
+                string clientIp = GetClientIp();
                 var qrlog = new QrLog
                 {
                     LogTypeId = 1,
                     QrCodeMainId = qr.Id,
-                    IpAddress = "",
+                    IpAddress = clientIp,
                     CreatedDate = DateTime.Now,
                     CreatedBy = 1,
                     IsActive = true,
-
                 };
                 _qrLogDal.Add(qrlog);
+
                 var qrDto = new QrCodeDetailDto
                 {
                     DetailTypeId = qr.DetailTypeId ?? default,
                     Empty = !qr.DetailTypeId.HasValue
                 };
-
                 if (qrDto.Empty)
                     return new SuccessDataResult<QrCodeDetailDto>(qrDto, Messages.EmptyQr);
 
                 var paramList = _paramItemDal.GetList();
-
                 switch (qr.DetailTypeId)
                 {
                     case 1:
                         var qrHuman = _qrCodeHumanDetailDal.Get(c => c.QrMainId == qr.Id);
                         qrDto.HumanDetail = _mapper.Map<QrCodeHumanDetailDto>(qrHuman);
-
                         if (qrHuman.ProfilePictureUrl != null)
                         {
-                            //string directory = _config.GetSection("Directories:FileDirectory").Value;
-
                             var directory = @"D:\vhosts\karekodla.com\UploadFiles\";
                             string filePath = Path.Combine(directory, "ProfilePictures", qrHuman.ProfilePictureUrl);
                             if (System.IO.File.Exists(filePath))
@@ -239,31 +240,14 @@ namespace NinjaTurtles.Business.Concrete
                                 qrDto.HumanDetail.ProfilePictureData = Convert.ToBase64String(bytes);
                             }
                         }
-
-
-                        qrDto.HumanDetail.Gender = qrHuman.GenderId != null
-                           ? paramList.FirstOrDefault(c => c.Id == qrHuman.GenderId)?.Name : null;
-
-                        qrDto.HumanDetail.MaritalStatus = qrHuman.MaritalStatusId != null
-                             ? paramList.FirstOrDefault(c => c.Id == qrHuman.MaritalStatusId)?.Name : null;
-
-                        qrDto.HumanDetail.EducationStatus = qrHuman.EducationStatusId != null
-        ? paramList.FirstOrDefault(c => c.Id == qrHuman.EducationStatusId)?.Name : null;
-
-                        qrDto.HumanDetail.CityOfResidence = qrHuman.CityOfResidenceId != null
-                            ? paramList.FirstOrDefault(c => c.Id == qrHuman.CityOfResidenceId)?.Name : null;
-
-                        qrDto.HumanDetail.BloodType = qrHuman.BloodTypeId != null
-                            ? paramList.FirstOrDefault(c => c.Id == qrHuman.BloodTypeId)?.Name : null;
-
-                        qrDto.HumanDetail.Profession = qrHuman.ProfessionId != null
-                            ? paramList.FirstOrDefault(c => c.Id == qrHuman.ProfessionId)?.Name : null;
-
-                        qrDto.HumanDetail.PrimaryRelation = qrHuman.PrimaryRelationId != null
-                            ? paramList.FirstOrDefault(c => c.Id == qrHuman.PrimaryRelationId)?.Name : null;
-
-                        qrDto.HumanDetail.SecondaryRelation = qrHuman.SecondaryRelationId != null
-                            ? paramList.FirstOrDefault(c => c.Id == qrHuman.SecondaryRelationId)?.Name : null;
+                        qrDto.HumanDetail.Gender = qrHuman.GenderId != null ? paramList.FirstOrDefault(c => c.Id == qrHuman.GenderId)?.Name : null;
+                        qrDto.HumanDetail.MaritalStatus = qrHuman.MaritalStatusId != null ? paramList.FirstOrDefault(c => c.Id == qrHuman.MaritalStatusId)?.Name : null;
+                        qrDto.HumanDetail.EducationStatus = qrHuman.EducationStatusId != null ? paramList.FirstOrDefault(c => c.Id == qrHuman.EducationStatusId)?.Name : null;
+                        qrDto.HumanDetail.CityOfResidence = qrHuman.CityOfResidenceId != null ? paramList.FirstOrDefault(c => c.Id == qrHuman.CityOfResidenceId)?.Name : null;
+                        qrDto.HumanDetail.BloodType = qrHuman.BloodTypeId != null ? paramList.FirstOrDefault(c => c.Id == qrHuman.BloodTypeId)?.Name : null;
+                        qrDto.HumanDetail.Profession = qrHuman.ProfessionId != null ? paramList.FirstOrDefault(c => c.Id == qrHuman.ProfessionId)?.Name : null;
+                        qrDto.HumanDetail.PrimaryRelation = qrHuman.PrimaryRelationId != null ? paramList.FirstOrDefault(c => c.Id == qrHuman.PrimaryRelationId)?.Name : null;
+                        qrDto.HumanDetail.SecondaryRelation = qrHuman.SecondaryRelationId != null ? paramList.FirstOrDefault(c => c.Id == qrHuman.SecondaryRelationId)?.Name : null;
                         break;
                     case 2:
                         var qrAnimal = _qrCodeAnimalDetailDal.Get(c => c.QrMainId == qr.Id);
@@ -274,13 +258,104 @@ namespace NinjaTurtles.Business.Concrete
                         break;
                 }
 
+                var customer = _customerDal.Get(c => c.Id == qr.CustomerId);
+
+                // ------------------ EKLENEN: basit IP -> konum + zaman ve mapUrl ------------------
+                // Istanbul saati formatı
+                var trTz = TimeZoneInfo.FindSystemTimeZoneById("Europe/Istanbul");
+                var nowTr = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, trTz);
+                var scanTime = nowTr.ToString("d MMMM yyyy HH:mm", new System.Globalization.CultureInfo("tr-TR"));
+
+
+                // Şehir/İlçe/Ülke ve (varsa) lat/lng -> Harita linki
+                string city = "", district = "", country = "", mapUrl = "";
+                try
+                {
+                    if (!string.IsNullOrWhiteSpace(clientIp))
+                    {
+                        using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
+                        var resp = await http.GetAsync($"https://ipapi.co/{clientIp}/json/");
+                        if (resp.IsSuccessStatusCode)
+                        {
+                            using var s = await resp.Content.ReadAsStreamAsync();
+                            using var doc = await System.Text.Json.JsonDocument.ParseAsync(s);
+                            city = doc.RootElement.TryGetProperty("city", out var c) ? c.GetString() ?? "" : "";
+                            district = doc.RootElement.TryGetProperty("region", out var r) ? r.GetString() ?? "" : ""; // İl/İlçe benzeri
+                            country = doc.RootElement.TryGetProperty("country_name", out var co) ? co.GetString() ?? "" : "";
+
+                            if (doc.RootElement.TryGetProperty("latitude", out var la) &&
+                                doc.RootElement.TryGetProperty("longitude", out var lo) &&
+                                la.TryGetDouble(out var latVal) && lo.TryGetDouble(out var lngVal))
+                            {
+                                mapUrl = $"https://maps.google.com/?q={latVal.ToString(System.Globalization.CultureInfo.InvariantCulture)},{lngVal.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+                            }
+                        }
+                    }
+                }
+                catch { /* jeo konum alınamazsa boş bırak */ }
+
+                // ------------------ ŞABLON REPLACE ------------------
+                // Not: Mail gönderme KISMINA DOKUNMUYORUZ. Sadece template parametrelerini dolduruyoruz.
+                var tpl = Messages.QrReadNotificationMailTemplate
+                    .Replace("{{ownerName}}", $"{customer.FirstName} {customer.LastName}")
+                    .Replace("{{scanTime}}", scanTime)
+                    .Replace("{{city}}", city)
+                    .Replace("{{district}}", district)
+                    .Replace("{{mapUrl}}", mapUrl) // boş kalırsa buton boş href olur; istersen şablonda koşullu render yapabilirsin.
+                    .Replace("{{year}}", DateTime.Now.Year.ToString())
+                    .Replace("{{securityUrl}}", "https://karekodla.com/security")
+                    .Replace("{{helpUrl}}", "https://karekodla.com/help");
+
+                // -------------------------------------------------------------------------------
+
+                MailWorker mail = new MailWorker();
+                mail.Init(StaticVars.InfoMailUserName, StaticVars.InfoMailPassword);
+
+                // ---- mail gönderim KISMI AYNI KALDI; sadece body'yi tpl ile veriyoruz ----
+                var mailBody = tpl; // önceki: Messages.QrReadNotificationMailTemplate.Replace(...) yerine
+                var result = await mail.SendMailAsync(
+                    customer.Email,
+                    StaticVars.VerifyMailUserName,
+                    "Karekodla",
+                    mailBody,
+                    "Karekodla – QR Okuma Uyarısı",
+                    true);
+
                 return new SuccessDataResult<QrCodeDetailDto>(qrDto);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new ErrorDataResult<QrCodeDetailDto>(Messages.DataNotFound);
             }
+
+            // ------ local helpers ------
+            string GetClientIp()
+            {
+                try
+                {
+                    // Eğer bu sınıfta IHttpContextAccessor varsa (_httpContextAccessor), onu kullan:
+                    var ctx = _httpContextAccessor.HttpContext;
+                    if (ctx == null) return "";
+
+                    var cf = ctx.Request.Headers["CF-Connecting-IP"].ToString();
+                    if (IPAddress.TryParse(cf, out _)) return cf;
+
+                    var xff = ctx.Request.Headers["X-Forwarded-For"].ToString();
+                    if (!string.IsNullOrWhiteSpace(xff))
+                    {
+                        var ip = xff.Split(',').Select(s => s.Trim()).FirstOrDefault();
+                        if (IPAddress.TryParse(ip, out _)) return ip!;
+                    }
+
+                    var xri = ctx.Request.Headers["X-Real-IP"].ToString();
+                    if (IPAddress.TryParse(xri, out _)) return xri;
+
+                    return ctx.Connection.RemoteIpAddress?.ToString() ?? "";
+                }
+                catch { return ""; }
+            }
         }
+
 
         public IResult UpdateAnimalDetail(QrCodeAnimalUpdateDto dto)
         {
@@ -288,9 +363,12 @@ namespace NinjaTurtles.Business.Concrete
             if (qr == null)
                 return new ErrorDataResult<QrCodeAnimalUpdateDto>(data: null, message: Messages.DataNotFound);
 
+            var qrAnimalData = _qrCodeAnimalDetailDal.Get(c => c.Id == dto.Id && dto.QrMainId == dto.QrMainId);
             qr.DetailTypeId = 2;
+            qrAnimalData.ModifiedBy = 1;
+            qrAnimalData.ModifiedDate = DateTime.Now;
             _qrCodeMainDal.Update(qr);
-            var qrAnimal = _mapper.Map<QrCodeAnimalDetail>(dto);
+            var qrAnimal = _mapper.Map(dto, qrAnimalData);
             _qrCodeAnimalDetailDal.Update(qrAnimal);
             return new Result(true, Messages.QrFilled);
 
@@ -313,11 +391,12 @@ namespace NinjaTurtles.Business.Concrete
             var qr = _qrCodeMainDal.Get(c => c.Id == dto.QrMainId && (!c.IsDeleted && c.IsActive));
             if (qr == null)
                 return new ErrorDataResult<QrCodeHumanUpdateDto>(data: null, message: Messages.DataNotFound);
-
+            var qrHumanData = _qrCodeHumanDetailDal.Get(c => c.Id == dto.Id && dto.QrMainId== dto.QrMainId);
             qr.DetailTypeId = 1;
             _qrCodeMainDal.Update(qr);
-            var qrHuman = _mapper.Map<QrCodeHumanDetail>(dto);
-
+            var qrHuman = _mapper.Map(dto,qrHumanData);
+            qrHuman.ModifiedBy = 1;
+            qrHuman.ModifiedDate = DateTime.Now;
             if (dto.File != null)
             {
                 var directory = @"D:\vhosts\karekodla.com\UploadFiles\";
@@ -350,6 +429,25 @@ namespace NinjaTurtles.Business.Concrete
             };
             _qrLogDal.Add(qrlog);
             _qrCodeHumanDetailDal.Update(qrHuman);
+            return new Result(true, Messages.QrFilled);
+
+        }
+
+        public IResult UpdateRedirectUrl(QrRedirectUrlUpdateDto dto)
+        {
+            var now = DateTime.Now;
+            var hasCode = _customerQrVerificationDal.Get(c => c.Code == dto.Code && c.ExpireDate > now);
+            if (hasCode == null)
+                return new ErrorDataResult<QrCodeAnimalDetailDto>(message: Messages.VerifyCodeExpired);
+
+            var qr = _qrCodeMainDal.Get(c => c.CustomerId == hasCode.CustomerId && c.Id == dto.QrMainId);
+            if (qr == null)
+                return new ErrorDataResult<QrCodeAnimalDetailDto>(null, Messages.DataNotFound);
+
+            qr.ModifiedDate = DateTime.Now;
+            qr.ModifiedBy = 1;
+            qr.RedirectUrl = dto.RedirectUrl;
+            _qrCodeMainDal.Update(qr);
             return new Result(true, Messages.QrFilled);
 
         }

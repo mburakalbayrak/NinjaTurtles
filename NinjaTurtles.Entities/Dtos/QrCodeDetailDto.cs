@@ -18,6 +18,7 @@ namespace NinjaTurtles.Entities.Dtos
 
     public class QrCodeHumanDetailDto
     {
+        public int Id { get; set; } 
         public string? FullName { get; set; } // Ad Soyad
         public DateTime? DateOfBirth { get; set; } // Doğum Tarihi
         public string? Gender { get; set; } // Cinsiyet (Id)
@@ -46,6 +47,7 @@ namespace NinjaTurtles.Entities.Dtos
 
     public class QrCodeAnimalDetailDto
     {
+        public int Id { get; set; }
         public string OwnerName { get; set; } // Sahip Adı
         public string OwnerPhoneNumber { get; set; } // Sahip Telefon Numarası
         public string AnimalName { get; set; } // Hayvanın Adı

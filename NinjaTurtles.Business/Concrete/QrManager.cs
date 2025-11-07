@@ -156,6 +156,9 @@ namespace NinjaTurtles.Business.Concrete
             if (hasCode == null)
                 return new ErrorDataResult<QrCodeAnimalDetailDto>(message: Messages.VerifyCodeExpired);
 
+            hasCode.VerifyDate = DateTime.Now;
+            _customerQrVerificationDal.Update(hasCode);
+
             var qr = _qrCodeMainDal.Get(c => c.CustomerId == hasCode.CustomerId && c.Id == dto.QrMainId);
             if (qr == null)
                 return new ErrorDataResult<QrCodeAnimalDetailDto>(null, Messages.DataNotFound);
@@ -176,6 +179,9 @@ namespace NinjaTurtles.Business.Concrete
             var hasCode = _customerQrVerificationDal.Get(c => c.Code == dto.Code && c.ExpireDate > now);
             if (hasCode == null)
                 return new ErrorDataResult<QrCodeHumanDetailDto>(message: Messages.VerifyCodeExpired);
+
+            hasCode.VerifyDate = DateTime.Now;
+            _customerQrVerificationDal.Update(hasCode);
 
             var qr = _qrCodeMainDal.Get(c => c.CustomerId == hasCode.CustomerId && c.Id == dto.QrMainId);
             if (qr == null)
@@ -210,26 +216,13 @@ namespace NinjaTurtles.Business.Concrete
 
             return new SuccessDataResult<QrCodeHumanDetailDto>(qrDto, Messages.AccountVerifySuccess);
         }
-        public async Task<IDataResult<QrCodeDetailDto>> GetQrDetail(Guid id)
+        public async Task<IDataResult<QrCodeDetailDto>> GetQrDetail(FilterQrDetailDto dto)
         {
             try
             {
-                var qr = _qrCodeMainDal.Get(c => c.Id == id && c.IsActive && !c.IsDeleted);
+                var qr = _qrCodeMainDal.Get(c => c.Id == dto.Id && c.IsActive && !c.IsDeleted);
                 if (qr == null)
                     return new ErrorDataResult<QrCodeDetailDto>(null, Messages.DataNotFound);
-
-
-                string clientIp = GetClientIp();
-                var qrlog = new QrLog
-                {
-                    LogTypeId = 1,
-                    QrCodeMainId = qr.Id,
-                    IpAddress = clientIp,
-                    CreatedDate = DateTime.Now,
-                    CreatedBy = 1,
-                    IsActive = true,
-                };
-                _qrLogDal.Add(qrlog);
 
                 var qrDto = new QrCodeDetailDto
                 {
@@ -274,83 +267,8 @@ namespace NinjaTurtles.Business.Concrete
                         break;
                 }
 
-                var customer = _customerDal.Get(c => c.Id == qr.CustomerId);
-
-                // ------------------ EKLENEN: basit IP -> konum + zaman ve mapUrl ------------------
-                // ... mevcut kodun içinde, customer'ı aldıktan hemen ÖNCE/SONRA uygun yere ekle:
-
-                // Istanbul saati
-                var trTz = TimeZoneInfo.FindSystemTimeZoneById("Europe/Istanbul");
-                var nowTr = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, trTz);
-                var scanTime = nowTr.ToString("d MMMM yyyy HH:mm", new System.Globalization.CultureInfo("tr-TR"));
-
-                // 1) Header'lardan lat/lng almaya çalış
-                double? headerLat = TryGetDoubleHeader("X-Geo-Lat");
-                double? headerLng = TryGetDoubleHeader("X-Geo-Lng");
-
-                // 2) Varsayılan: IP'den şehir/ilçe/ülke (+ yaklaşık lat/lng varsa harita)
-                string city = "", district = "", country = "", mapUrl = "";
-                clientIp = GetClientIp();
-
-                try
-                {
-                    if (headerLat.HasValue && headerLng.HasValue)
-                    {
-                        // Kesin konumdan direkt harita linki
-                        mapUrl = $"https://maps.google.com/?q={headerLat.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)},{headerLng.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
-
-                        // (OPSİYONEL) Lat/Lng -> Şehir-İlçe ters geocode (Nominatim).
-                        // Minimal: 2 sn timeout, User-Agent zorunlu.
-                        (city, district, country) = await ReverseGeocodeAsync(headerLat.Value, headerLng.Value);
-                    }
-                    else if (!string.IsNullOrWhiteSpace(clientIp))
-                    {
-                        using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
-                        var resp = await http.GetAsync($"https://ipapi.co/{clientIp}/json/");
-                        if (resp.IsSuccessStatusCode)
-                        {
-                            using var s = await resp.Content.ReadAsStreamAsync();
-                            using var doc = await System.Text.Json.JsonDocument.ParseAsync(s);
-                            city = doc.RootElement.TryGetProperty("city", out var c) ? c.GetString() ?? "" : "";
-                            district = doc.RootElement.TryGetProperty("region", out var r) ? r.GetString() ?? "" : "";
-                            country = doc.RootElement.TryGetProperty("country_name", out var co) ? co.GetString() ?? "" : "";
-
-                            if (doc.RootElement.TryGetProperty("latitude", out var la) &&
-                                doc.RootElement.TryGetProperty("longitude", out var lo) &&
-                                la.TryGetDouble(out var latVal) && lo.TryGetDouble(out var lngVal))
-                            {
-                                mapUrl = $"https://maps.google.com/?q={latVal.ToString(System.Globalization.CultureInfo.InvariantCulture)},{lngVal.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
-                            }
-                        }
-                    }
-                }
-                catch { /* sessiz geç */ }
-
-                // ---- ŞABLON REPLACE (mail kısmına dokunmadan, body'yi hazırlıyoruz) ----
-                var tpl = Messages.QrReadNotificationMailTemplate
-                    .Replace("{{ownerName}}", $"{customer.FirstName} {customer.LastName}")
-                    .Replace("{{scanTime}}", scanTime)
-                    .Replace("{{city}}", city)
-                    .Replace("{{district}}", district)
-                    .Replace("{{mapUrl}}", mapUrl)
-                    .Replace("{{year}}", DateTime.Now.Year.ToString())
-                    .Replace("{{securityUrl}}", "https://karekodla.com/security")
-                    .Replace("{{helpUrl}}", "https://karekodla.com/help");
-
-                // -------------------------------------------------------------------------------
-
-                MailWorker mail = new MailWorker();
-                mail.Init(StaticVars.InfoMailUserName, StaticVars.InfoMailPassword);
-
-                // ---- mail gönderim KISMI AYNI KALDI; sadece body'yi tpl ile veriyoruz ----
-                var mailBody = tpl; // önceki: Messages.QrReadNotificationMailTemplate.Replace(...) yerine
-                var result = await mail.SendMailAsync(
-                    customer.Email,
-                    StaticVars.VerifyMailUserName,
-                    "Karekodla",
-                    mailBody,
-                    "Karekodla – QR Okuma Uyarısı",
-                    true);
+                if (dto.From != "update")
+                    await SendQrReadMail(qr.Id);
 
                 return new SuccessDataResult<QrCodeDetailDto>(qrDto);
             }
@@ -479,7 +397,7 @@ namespace NinjaTurtles.Business.Concrete
             _qrLogDal.Add(qrlog);
             return new Result(true, Messages.QrFilled);
 
-          
+
         }
 
         public IResult UpdateHumanDetail(QrCodeHumanUpdateDto dto)
@@ -538,6 +456,9 @@ namespace NinjaTurtles.Business.Concrete
             if (hasCode == null)
                 return new ErrorDataResult<QrCodeAnimalDetailDto>(message: Messages.VerifyCodeExpired);
 
+            hasCode.VerifyDate = DateTime.Now;
+            _customerQrVerificationDal.Update(hasCode);
+
             var qr = _qrCodeMainDal.Get(c => c.CustomerId == hasCode.CustomerId && c.Id == dto.QrMainId);
             if (qr == null)
                 return new ErrorDataResult<QrCodeAnimalDetailDto>(null, Messages.DataNotFound);
@@ -560,6 +481,96 @@ namespace NinjaTurtles.Business.Concrete
             };
             return new Result(true, Messages.QrFilled);
 
+        }
+
+        public async Task SendQrReadMail(Guid id)
+        {
+            var qr = _qrCodeMainDal.Get(c => c.Id == id && (!c.IsDeleted && c.IsActive));
+            var customer = _customerDal.Get(c => c.Id == qr.CustomerId);
+
+            string clientIp = GetClientIp();
+            var qrlog = new QrLog
+            {
+                LogTypeId = 1,
+                QrCodeMainId = qr.Id,
+                IpAddress = clientIp,
+                CreatedDate = DateTime.Now,
+                CreatedBy = 1,
+                IsActive = true,
+            };
+            _qrLogDal.Add(qrlog);
+            // Istanbul saati
+            var trTz = TimeZoneInfo.FindSystemTimeZoneById("Europe/Istanbul");
+            var nowTr = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, trTz);
+            var scanTime = nowTr.ToString("d MMMM yyyy HH:mm", new System.Globalization.CultureInfo("tr-TR"));
+
+            // 1) Header'lardan lat/lng almaya çalış
+            double? headerLat = TryGetDoubleHeader("X-Geo-Lat");
+            double? headerLng = TryGetDoubleHeader("X-Geo-Lng");
+
+            // 2) Varsayılan: IP'den şehir/ilçe/ülke (+ yaklaşık lat/lng varsa harita)
+            string city = "", district = "", country = "", mapUrl = "";
+            clientIp = GetClientIp();
+
+            try
+            {
+                if (headerLat.HasValue && headerLng.HasValue)
+                {
+                    // Kesin konumdan direkt harita linki
+                    mapUrl = $"https://maps.google.com/?q={headerLat.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)},{headerLng.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+
+                    // (OPSİYONEL) Lat/Lng -> Şehir-İlçe ters geocode (Nominatim).
+                    // Minimal: 2 sn timeout, User-Agent zorunlu.
+                    (city, district, country) = await ReverseGeocodeAsync(headerLat.Value, headerLng.Value);
+                }
+                else if (!string.IsNullOrWhiteSpace(clientIp))
+                {
+                    using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
+                    var resp = await http.GetAsync($"https://ipapi.co/{clientIp}/json/");
+                    if (resp.IsSuccessStatusCode)
+                    {
+                        using var s = await resp.Content.ReadAsStreamAsync();
+                        using var doc = await System.Text.Json.JsonDocument.ParseAsync(s);
+                        city = doc.RootElement.TryGetProperty("city", out var c) ? c.GetString() ?? "" : "";
+                        district = doc.RootElement.TryGetProperty("region", out var r) ? r.GetString() ?? "" : "";
+                        country = doc.RootElement.TryGetProperty("country_name", out var co) ? co.GetString() ?? "" : "";
+
+                        if (doc.RootElement.TryGetProperty("latitude", out var la) &&
+                            doc.RootElement.TryGetProperty("longitude", out var lo) &&
+                            la.TryGetDouble(out var latVal) && lo.TryGetDouble(out var lngVal))
+                        {
+                            mapUrl = $"https://maps.google.com/?q={latVal.ToString(System.Globalization.CultureInfo.InvariantCulture)},{lngVal.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+                        }
+                    }
+                }
+            }
+            catch { /* sessiz geç */ }
+
+            // ---- ŞABLON REPLACE (mail kısmına dokunmadan, body'yi hazırlıyoruz) ----
+            var tpl = Messages.QrReadNotificationMailTemplate
+                .Replace("{{ownerName}}", $"{customer.FirstName} {customer.LastName}")
+                .Replace("{{scanTime}}", scanTime)
+                .Replace("{{city}}", city)
+                .Replace("{{district}}", district)
+                .Replace("{{mapUrl}}", mapUrl)
+                .Replace("{{year}}", DateTime.Now.Year.ToString())
+                .Replace("{{securityUrl}}", "https://karekodla.com/security")
+                .Replace("{{helpUrl}}", "https://karekodla.com/help");
+
+            // -------------------------------------------------------------------------------
+
+            MailWorker mail = new MailWorker();
+            mail.Init(StaticVars.InfoMailUserName, StaticVars.InfoMailPassword);
+
+            // ---- mail gönderim KISMI AYNI KALDI; sadece body'yi tpl ile veriyoruz ----
+            var mailBody = tpl; // önceki: Messages.QrReadNotificationMailTemplate.Replace(...) yerine
+            var result = await mail.SendMailAsync(
+                customer.Email,
+                StaticVars.VerifyMailUserName,
+                "Karekodla",
+                mailBody,
+                "Karekodla – QR Okuma Uyarısı",
+                true);
         }
     }
 }

@@ -29,8 +29,9 @@ namespace NinjaTurtles.WebApi.Middlewares
                 var payload = new
                 {
                     success = false,
-                    message = "Beklenmeyen bir hata oluþtu.",
-                    traceId
+                    message = ex.Message,
+                    traceId,
+                    innerException = ex.InnerException?.Message
                 };
                 var json = JsonSerializer.Serialize(payload);
                 await context.Response.WriteAsync(json);

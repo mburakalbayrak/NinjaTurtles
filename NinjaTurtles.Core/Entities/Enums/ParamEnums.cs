@@ -7,6 +7,8 @@ namespace NinjaTurtles.Core.Entities.Enums
         [Description("Medeni Durum")]
         MaritalStatus = 1,
         [Description("Kan Grubu")]
-        BloodGroup = 2
+        BloodGroup = 2,
+        [Description("Sözleşmeler")]
+        Contracts = 3,
     }
 }

@@ -235,7 +235,106 @@ namespace NinjaTurtles.Business.Constants
 </html>
 
 ";
+        public static string ContractTemplate = @"
+            <!DOCTYPE html>
+                <html lang=""tr"">
+                <head>
+                <meta charset=""UTF-8"">
+                <title>Onay Sayfası</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            background: #f4f4f4;
+                            padding: 20px;
+                        }
 
+                        .portlet {
+                            background: #fff;
+                            border: 1px solid #ddd;
+                            border-radius: 5px;
+                            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                            padding: 20px;
+                            max-width: 800px;
+                            margin: auto;
+                        }
+
+                        .portlet-title {
+                            display: flex;
+                            align-items: center;
+                            margin-bottom: 10px;
+                        }
+
+                        .portlet-title i {
+                            color: #333;
+                            margin-right: 10px;
+                        }
+
+                        .caption-subject {
+                            font-size: 18px;
+                            font-weight: bold;
+                            text-transform: uppercase;
+                        }
+
+                        hr {
+                            margin: 20px 0;
+                            border: none;
+                            border-top: 1px solid #ccc;
+                        }
+
+                        .contentDiv {
+                            font-size: 16px;
+                            margin-bottom: 20px;
+                        }
+
+                        .pull-right {
+                            text-align: right;
+                        }
+
+                        .form-group {
+                            margin-bottom: 10px;
+                        }
+
+                        b {
+                            font-weight: bold;
+                        }
+                    </style>
+             </head>
+             <body>
+                <div class=""portlet"">
+                    <div class=""portlet-title"">
+                        <span class=""caption-subject"">
+                            <b>{{KnowledgeBaseName}}</b>
+                        </span>
+                    </div>
+                    <hr />
+                    <div class=""portlet-body"">
+                        <div class=""form-body"">
+                            <div class=""contentDiv"">
+                                {{Explanation}}
+                            </div>
+                            <hr />
+                            <div class=""pull-right"">
+                                <div class=""form-group"">
+                                    <b>Okudum, Anladım, Kabul Ediyorum.</b>
+                                </div>
+                                <div class=""form-group"">
+                                    Ad Soyad: <b>{{NameSurname}}</b>
+                                </div>
+                                <div class=""form-group"">
+                                    Onay Tarihi: <b>{{ApprovalDate}}</b>
+                                </div>
+                                <div class=""form-group"">
+                                    IP: <b>{{IP}}</b>
+                                </div>
+                                <div class=""form-group"">
+                                    OTP: <b>{{OTP}}</b>
+                                </div>
+                            </div>     
+                        </div>
+                    </div>
+                </div>
+            </body>
+         </html>";
 
 
     }

@@ -105,7 +105,7 @@ namespace NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts
         public DbSet<User> User { get; set; }
         public DbSet<OperationClaim> OperationClaim { get; set; }
         public DbSet<UserOperationClaim> UserOperationClaim { get; set; }
-        public DbSet<UserOperationClaim> CustomerContract { get; set; }
+        public DbSet<CustomerContract> CustomerContract { get; set; }
         
     }
 }

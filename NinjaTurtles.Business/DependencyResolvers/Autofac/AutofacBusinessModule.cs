@@ -27,6 +27,7 @@ namespace NinjaTurtles.Business.DependencyResolvers.Autofac
             builder.RegisterType<EfQrCodeAnimalDetailDal>().As<IQrCodeAnimalDetailDal>().InstancePerLifetimeScope();
             builder.RegisterType<EfQrLogDal>().As<IQrLogDal>().InstancePerLifetimeScope();
             builder.RegisterType<EfUserDal>().As<IUserDal>().InstancePerLifetimeScope();
+            builder.RegisterType<EfCustomerContractDal>().As<ICustomerContractDal>().InstancePerLifetimeScope();
 
             builder.RegisterType<QrManager>().As<IQrService>().InstancePerLifetimeScope();
             builder.RegisterType<CustomerManager>().As<ICustomerService>().InstancePerLifetimeScope();

@@ -84,6 +84,11 @@ namespace NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts
                 .Property(p => p.Id)
                 .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
 
+
+            modelBuilder.Entity<CustomerContract>()
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd(); // Id için otomatik artış ayarı
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -100,7 +105,7 @@ namespace NinjaTurtles.DataAccess.Concrete.EntityFramework.Contexts
         public DbSet<User> User { get; set; }
         public DbSet<OperationClaim> OperationClaim { get; set; }
         public DbSet<UserOperationClaim> UserOperationClaim { get; set; }
+        public DbSet<UserOperationClaim> CustomerContract { get; set; }
         
-
     }
 }

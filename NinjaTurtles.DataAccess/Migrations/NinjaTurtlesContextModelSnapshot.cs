@@ -236,6 +236,54 @@ namespace NinjaTurtles.DataAccess.Migrations
                     b.ToTable("Customer");
                 });
 
+            modelBuilder.Entity("NinjaTurtles.Entities.Concrete.CustomerContract", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContractName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("ModifiedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("VerifyCode")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("VerifyDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("VerifyState")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CustomerContract");
+                });
+
             modelBuilder.Entity("NinjaTurtles.Entities.Concrete.CustomerQrVerification", b =>
                 {
                     b.Property<int>("Id")
@@ -505,9 +553,6 @@ namespace NinjaTurtles.DataAccess.Migrations
                     b.Property<Guid>("QrMainId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("RedirectUrl")
-                        .HasColumnType("bit");
-
                     b.Property<string>("RegularMedications")
                         .HasColumnType("nvarchar(max)");
 
@@ -519,9 +564,6 @@ namespace NinjaTurtles.DataAccess.Migrations
 
                     b.Property<int?>("SecondaryRelationId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Url")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

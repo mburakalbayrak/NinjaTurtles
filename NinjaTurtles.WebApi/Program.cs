@@ -9,8 +9,15 @@ using NinjaTurtles.Core.NetCoreConfiguration;
 using NinjaTurtles.Core.Utilities.IoC;
 using NinjaTurtles.Core.Utilities.Security.Enctyption;
 using NinjaTurtles.Core.Utilities.Security.Jwt;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Serilog configuration from appsettings
+builder.Host.UseSerilog((ctx, lc) =>
+{
+    lc.ReadFrom.Configuration(ctx.Configuration);
+});
 
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 builder.Services.AddDependencyResolvers(new ICoreModule[]
@@ -42,7 +49,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Enter 'Bearer' [space] and then your token in the text input below.\n\nExample: 'Bearer 12345abcdef'"
+        Description = "Enter 'Bearer' [space] and then your token in the text input below.\n\nExample: 'Bearer12345abcdef'"
     });
 
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
@@ -56,17 +63,12 @@ builder.Services.AddSwaggerGen(options =>
                     Id = "Bearer"
                 }
             },
-            new string[] {} // Boþ býrakabilirsiniz veya belirli roller ekleyebilirsiniz
+            new string[] {}
         }
     });
 });
 
-
-// burada WithOrigins ile domainimiz neyse react projesinde vs onu yazýyuoruz ki burasý dýþýnda baþka bir yerden istek gelirse cors hatasý versin  api endpoint https://localhost:44368/
-//builder.Services.AddCors(options => options.AddPolicy("AllowOrigin", builder => builder.WithOrigins("http://localhost:44368")));
-
-var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger("JwtEventsLogger");
-
+// JWT
 var tokenOptions = AppConfig.Configuration.GetSection("TokenOptions").Get<TokenOptions>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
@@ -82,22 +84,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ClockSkew = TimeSpan.Zero
     };
 
-    // Events yapýlandýrmasý
+    // Events configuration - log with Serilog
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
         {
-            Console.WriteLine("Token received.");
+            Log.Debug("JWT received for {Path}", context.HttpContext.Request.Path);
             return Task.CompletedTask;
         },
         OnAuthenticationFailed = context =>
         {
-            Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+            Log.Warning(context.Exception, "JWT authentication failed for {Path}", context.HttpContext.Request.Path);
             return Task.CompletedTask;
         },
         OnTokenValidated = context =>
         {
-            Console.WriteLine($"Token validated for: {context.Principal.Identity.Name}");
+            Log.Information("JWT validated for {User}", context.Principal?.Identity?.Name ?? "anonymous");
             return Task.CompletedTask;
         }
     };
@@ -106,36 +108,27 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
 builder.Services.AddAuthorization();
 
-
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// Global exception handling (custom middleware)
+app.UseMiddleware<NinjaTurtles.WebApi.Middlewares.ExceptionHandlingMiddleware>();
 
-
-//app.UseCors(builder => builder.WithOrigins("http://localhost:44368").AllowAnyHeader());
-
-    
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseDeveloperExceptionPage();
-}
+// Base path (if any)
 app.UsePathBase("/qrapi");
 app.UseHttpsRedirection();
 
 app.UseRouting();
 
+// Do NOT log raw tokens in production; only presence
 app.Use(async (context, next) =>
 {
     if (context.Request.Headers.ContainsKey("Authorization"))
     {
-        var token = context.Request.Headers["Authorization"].FirstOrDefault();
-        Console.WriteLine($"Authorization Header: {token}");
+        Log.Debug("Authorization header present for {Path}", context.Request.Path);
     }
     else
     {
-        Console.WriteLine("Authorization Header is missing.");
+        Log.Debug("Authorization header missing for {Path}", context.Request.Path);
     }
     await next.Invoke();
 });
@@ -146,17 +139,25 @@ app.UseCors(_ => _
 .AllowAnyHeader()
 .WithExposedHeaders("Content-Disposition"));
 
-
-// UseAuthentication üstte olmalý  UseAuthorization aþaðýda olmalý, UseAuthentication eve girmek için izindir, UseAuthorization evin içindeki mutfaða girmek için role gibi düþünebiliriz
+// Authentication/Authorization
 app.UseAuthentication();
-
 app.UseAuthorization();
 
-app.UseSwagger();
+// Serilog request logging (HTTP pipeline)
+app.UseSerilogRequestLogging(opts =>
+{
+    opts.EnrichDiagnosticContext = (diag, http) =>
+    {
+        diag.Set("ClientIP", http.Connection.RemoteIpAddress?.ToString());
+        diag.Set("UserAgent", http.Request.Headers["User-Agent"].ToString());
+        diag.Set("UserName", http.User?.Identity?.Name);
+    };
+});
 
+// Swagger
+app.UseSwagger();
 app.UseSwaggerUI();
 
-
-app.MapControllers(); // Controller rotalarýný ekle
+app.MapControllers();
 
 app.Run();

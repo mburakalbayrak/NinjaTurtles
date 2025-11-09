@@ -5,7 +5,7 @@ namespace NinjaTurtles.Business.Abstract
 {
     public interface IQrService
     {
-        Task<IDataResult<QrCodeDetailDto>> GetQrDetail(Guid id);
+        Task<IDataResult<QrCodeDetailDto>> GetQrDetail(FilterQrDetailDto dto);
         IResult CreateHumanDetail(QrCodeHumanCreateDto dto);
         IResult CreateRedirectUrl(QrRedirectUrlDto dto);
         IResult UpdateRedirectUrl(QrRedirectUrlUpdateDto dto);
@@ -14,7 +14,7 @@ namespace NinjaTurtles.Business.Abstract
         IResult UpdateHumanDetail(QrCodeHumanUpdateDto dto);
         IDataResult<QrCodeAnimalDetailDto> GetAnimalDetailVerify(QrUpdateVerifyDto dto);
         IResult UpdateAnimalDetail(QrCodeAnimalUpdateDto dto);
-
+        Task SendQrReadMail(Guid id);
 
     }
 }

@@ -18,9 +18,9 @@ namespace NinjaTurtles.WebApi.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetQrDetail(Guid id)
+        public async Task<IActionResult> GetQrDetail([FromQuery] FilterQrDetailDto dto)
         {
-            var qr = await _qrService.GetQrDetail(id);
+            var qr = await _qrService.GetQrDetail(dto);
             return Ok(qr);
         }
 

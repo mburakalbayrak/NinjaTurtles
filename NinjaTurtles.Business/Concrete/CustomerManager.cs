@@ -120,6 +120,8 @@ namespace NinjaTurtles.Business.Concrete
             if (code == null)
                 return new ErrorDataResult<int>(message: Messages.VerifyCodeExpired);
 
+            code.VerifyDate = DateTime.Now;
+            _customerQrVerificationDal.Update(code);
             customer.IsActive = true;
             _customerDal.Update(customer);
 

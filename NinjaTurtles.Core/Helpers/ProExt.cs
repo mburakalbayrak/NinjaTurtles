@@ -4,12 +4,11 @@ namespace NinjaTurtles.Core.Helpers
 {
     public class ProExt
     {
-      
-        public static long GenerateAccountNumber(String startWith = "32", string numLength = "6")
+
+        public static int NextSixDigitCode()
         {
-            Random generator = new Random();
-            String createNumber = generator.Next(0, 999999).ToString("D" + numLength);
-            return Convert.ToInt64(startWith + createNumber);
+            int value = RandomNumberGenerator.GetInt32(0, 1_000_000); 
+            return value;
         }
 
         public static string GenerateBase64WithReplace()

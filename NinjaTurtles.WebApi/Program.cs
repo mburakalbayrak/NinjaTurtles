@@ -1,5 +1,7 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using DinkToPdf.Contracts;
+using DinkToPdf;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using NinjaTurtles.Business.DependencyResolvers.Autofac;
@@ -33,6 +35,8 @@ builder.Host.ConfigureContainer<ContainerBuilder>(builder =>
 builder.Services.AddControllers(); // Controller'lar için gerekli
 builder.Services.AddEndpointsApiExplorer();
 
+builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
@@ -51,6 +55,8 @@ builder.Services.AddSwaggerGen(options =>
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
         Description = "Enter 'Bearer' [space] and then your token in the text input below.\n\nExample: 'Bearer12345abcdef'"
     });
+
+
 
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {

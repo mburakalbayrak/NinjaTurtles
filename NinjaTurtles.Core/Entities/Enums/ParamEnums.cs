@@ -9,6 +9,6 @@ namespace NinjaTurtles.Core.Entities.Enums
         [Description("Kan Grubu")]
         BloodGroup = 2,
         [Description("Sözleşmeler")]
-        Contracts = 3,
+        Contracts = 17,
     }
 }

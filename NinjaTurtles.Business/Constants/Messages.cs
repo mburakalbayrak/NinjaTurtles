@@ -254,7 +254,7 @@ namespace NinjaTurtles.Business.Constants
                             border-radius: 5px;
                             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
                             padding: 20px;
-                            max-width: 800px;
+                            max-width: 1200px;
                             margin: auto;
                         }
 
@@ -272,7 +272,6 @@ namespace NinjaTurtles.Business.Constants
                         .caption-subject {
                             font-size: 18px;
                             font-weight: bold;
-                            text-transform: uppercase;
                         }
 
                         hr {

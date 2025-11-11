@@ -1,12 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using NinjaTurtles.Core.DataAccess.Concrete.Dto;
 using NinjaTurtles.Core.Utilities.Results;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace NinjaTurtles.Core.Helpers.FileUpload
 {
@@ -87,20 +82,50 @@ namespace NinjaTurtles.Core.Helpers.FileUpload
                 return new ErrorDataResult<CreateFileDto>(createFile);
             }
         }
-
-        public static IFormFile ConvertByteArrayToFormFile(byte[] fileBytes, string fileName, string contentType = "application/pdf")
+        public static IDataResult<CreateFileDto> CreateFileFromBytes(CreateFileByteWithFileNameDto dto)
         {
-            var stream = new MemoryStream(fileBytes);
-            var formFile = new FormFile(stream, 0, fileBytes.Length, "file", fileName)
+            string fileName = string.Empty;
+            CreateFileDto createFile = new();
+
+            try
             {
-                Headers = new HeaderDictionary()
+                if (!Directory.Exists(dto.FolderPath))
                 {
-                    { "Content-Disposition", $"form-data; name=\"SeaFile\"; filename=\"{fileName}\"" }
-                },
-                ContentType = contentType,
-                ContentDisposition = $"form-data; name=\"SeaFile\"; filename=\"{fileName}\""
-            };
-            return formFile;
+                    Directory.CreateDirectory(dto.FolderPath);
+                }
+                var extension = Path.GetExtension(dto.FileName);
+                fileName = Path.GetFileNameWithoutExtension(dto.FileName) + "_" + DateTime.Now.Ticks + extension;
+                var path = Path.Combine(dto.FolderPath, fileName);
+
+                File.WriteAllBytes(path, dto.File);
+
+                createFile.RealName = dto.FileName;
+                createFile.IsSuccess = true;
+                createFile.FileName = fileName;
+                createFile.FullPath = path;
+                return new SuccessDataResult<CreateFileDto>(createFile);
+            }
+            catch (Exception e)
+            {
+                createFile.IsSuccess = false;
+                createFile.FileName = e.Message;
+                return new ErrorDataResult<CreateFileDto>(createFile);
+            }
         }
+
+        //public static IFormFile ConvertByteArrayToFormFile(byte[] fileBytes, string fileName, string contentType = "application/pdf")
+        //{
+        //    var stream = new MemoryStream(fileBytes);
+        //    var formFile = new FormFile(stream, 0, fileBytes.Length, "file", fileName)
+        //    {
+        //        Headers = new HeaderDictionary()
+        //        {
+        //            { "Content-Disposition", $"form-data; name=\"SeaFile\"; filename=\"{fileName}\"" }
+        //        },
+        //        ContentType = contentType,
+        //        ContentDisposition = $"form-data; name=\"SeaFile\"; filename=\"{fileName}\""
+        //    };
+        //    return formFile;
+        //}
     }
 }

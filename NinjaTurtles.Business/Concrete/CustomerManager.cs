@@ -12,10 +12,7 @@ using NinjaTurtles.Core.Utilities.Results;
 using NinjaTurtles.DataAccess.Abstract;
 using NinjaTurtles.Entities.Concrete;
 using NinjaTurtles.Entities.Dtos;
-using System.Diagnostics.Contracts;
-using System.IO;
 using System.Net;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace NinjaTurtles.Business.Concrete
 {
@@ -24,15 +21,17 @@ namespace NinjaTurtles.Business.Concrete
         private ICustomerDal _customerDal;
         private ICustomerQrVerificationDal _customerQrVerificationDal;
         private IParamItemDal _paramItemDal;
+        private ICustomerContractDal _customerContractDal;
         private IHttpContextAccessor _httpContextAccessor;
         private IConverter _converter;
         private IMapper _mapper;
 
-        public CustomerManager(ICustomerDal customerDal, ICustomerQrVerificationDal customerQrVerificationDal, IParamItemDal paramItemDal, IHttpContextAccessor httpContextAccessor, IConverter converter, IMapper mapper)
+        public CustomerManager(ICustomerDal customerDal, ICustomerQrVerificationDal customerQrVerificationDal, IParamItemDal paramItemDal, ICustomerContractDal customerContractDal, IHttpContextAccessor httpContextAccessor, IConverter converter, IMapper mapper)
         {
             _customerDal = customerDal;
             _customerQrVerificationDal = customerQrVerificationDal;
             _paramItemDal = paramItemDal;
+            _customerContractDal = customerContractDal;
             _httpContextAccessor = httpContextAccessor;
             _converter = converter;
             _mapper = mapper;
@@ -54,7 +53,7 @@ namespace NinjaTurtles.Business.Concrete
                     returnMessage = Messages.CustomerAdded;
                 }
 
-                var code = Convert.ToInt32(ProExt.GenerateAccountNumber(null, "6"));
+                var code = ProExt.NextSixDigitCode();
                 MailWorker mail = new MailWorker();
 
                 mail.Init(StaticVars.VerifyMailUserName, StaticVars.VerifyMailPassword);
@@ -99,7 +98,7 @@ namespace NinjaTurtles.Business.Concrete
             var customer = _customerDal.GetList(c => c.Email == email && !c.IsDeleted).LastOrDefault();
             if (customer == null)
                 return new Result(false, Messages.UserNotFound);
-            var code = Convert.ToInt32(ProExt.GenerateAccountNumber(null, "6"));
+            var code = ProExt.NextSixDigitCode();
 
             MailWorker mail = new MailWorker();
 
@@ -154,18 +153,34 @@ namespace NinjaTurtles.Business.Concrete
             {
                 var contractText = CreateContract(contractName, explanation);
                 var fileName = $"{contractName}_{customer.FirstName}_{customer.LastName}.pdf";
-                var formFile = WriteFile.ConvertByteArrayToFormFile(htmlToPdf.ConvertHtml(contractText, ""), fileName);
-                WriteFile.CreateFileWithFileName(new CreateFileWithFileNameDto
+                var formFile = htmlToPdf.ConvertHtml(contractText, "");
+                WriteFile.CreateFileFromBytes(new CreateFileByteWithFileNameDto
                 {
                     File = formFile,
                     FolderPath = directory,
                     FileName = fileName
                 });
+
+                var customerContract = new CustomerContract
+                {
+                    CustomerId = customer.Id,
+                    ContractName = contractName,
+                    FileName = fileName,
+                    CreatedDate = code.VerifyDate.Value,
+                    VerifyDate = code.VerifyDate.Value,
+                    VerifyState = 1,
+                    VerifyCode = code.Code,
+                    IsActive = true,
+                };
+                _customerContractDal.Add(customerContract);
             }
 
             var contractKvkk = _paramItemDal.Get(c => c.ParamId == ParamEnums.Contracts && c.Value == 1 && c.IsActive);
+
+            var contractExplicit = _paramItemDal.Get(c => c.ParamId == ParamEnums.Contracts && c.Value == 2 && c.IsActive);
+
             SaveContract("KVKK Aydınlatma Metni", contractKvkk.Name);
-            SaveContract("Açık Rıza Metni", contractKvkk.Name);
+            SaveContract("Açık Rıza Metni", contractExplicit.Name);
 
             return new SuccessDataResult<int>(customer.Id, Messages.AccountVerifySuccess);
 

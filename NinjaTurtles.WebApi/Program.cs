@@ -42,7 +42,7 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
     {
         Version = "v1",
-        Title = "NinjaTurtles API",
+        Title = "Karekodla API",
         Description = "API Documentation"
     });
 

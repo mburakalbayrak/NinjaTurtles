@@ -131,79 +131,85 @@ namespace NinjaTurtles.Business.Concrete
 
             code.VerifyDate = DateTime.Now;
             _customerQrVerificationDal.Update(code);
-            customer.IsActive = true;
-            _customerDal.Update(customer);
 
-            string directory = Path.Combine(@"D:\vhosts\karekodla.com\UploadFiles\Contracts", $"{customer.FirstName}_{customer.LastName}_{customer.Id}");
 
-            IHtmlToPdf htmlToPdf = new HtmlToPdf(_converter);
-
-            string CreateContract(string contractName, string explanation)
+            if (!customer.IsActive)
             {
-                return Messages.ContractTemplate
-                    .Replace("{{KnowledgeBaseName}}", contractName)
-                    .Replace("{{Explanation}}", explanation)
-                    .Replace("{{NameSurname}}", $"{customer.FirstName} {customer.LastName}")
-                    .Replace("{{ApprovalDate}}", $"{code.VerifyDate:dd.MM.yyyy HH:mm}")
-                    .Replace("{{IP}}", GetClientIp())
-                    .Replace("{{OTP}}", code.Code.ToString());
-            }
+                customer.IsActive = true;
+                _customerDal.Update(customer);
 
-            void SaveContract(string contractName, string explanation)
-            {
-                var contractText = CreateContract(contractName, explanation);
-                var fileName = $"{contractName}_{customer.FirstName}_{customer.LastName}.pdf";
-                var formFile = htmlToPdf.ConvertHtml(contractText, "");
-                WriteFile.CreateFileFromBytes(new CreateFileByteWithFileNameDto
+                string directory = Path.Combine(@"D:\vhosts\karekodla.com\UploadFiles\Contracts", $"{customer.FirstName}_{customer.LastName}_{customer.Id}");
+
+                IHtmlToPdf htmlToPdf = new HtmlToPdf(_converter);
+
+                string CreateContract(string contractName, string explanation)
                 {
-                    File = formFile,
-                    FolderPath = directory,
-                    FileName = fileName
-                });
+                    return Messages.ContractTemplate
+                        .Replace("{{KnowledgeBaseName}}", contractName)
+                        .Replace("{{Explanation}}", explanation)
+                        .Replace("{{NameSurname}}", $"{customer.FirstName} {customer.LastName}")
+                        .Replace("{{ApprovalDate}}", $"{code.VerifyDate:dd.MM.yyyy HH:mm}")
+                        .Replace("{{IP}}", GetClientIp())
+                        .Replace("{{OTP}}", code.Code.ToString());
+                }
 
-                var customerContract = new CustomerContract
+                void SaveContract(string contractName, string explanation)
                 {
-                    CustomerId = customer.Id,
-                    ContractName = contractName,
-                    FileName = fileName,
-                    CreatedDate = code.VerifyDate.Value,
-                    VerifyDate = code.VerifyDate.Value,
-                    VerifyState = 1,
-                    VerifyCode = code.Code,
-                    IsActive = true,
-                };
-                _customerContractDal.Add(customerContract);
+                    var contractText = CreateContract(contractName, explanation);
+                    var fileName = $"{contractName}_{customer.FirstName}_{customer.LastName}.pdf";
+                    var formFile = htmlToPdf.ConvertHtml(contractText, "");
+                    WriteFile.CreateFileFromBytes(new CreateFileByteWithFileNameDto
+                    {
+                        File = formFile,
+                        FolderPath = directory,
+                        FileName = fileName
+                    });
+
+                    var customerContract = new CustomerContract
+                    {
+                        CustomerId = customer.Id,
+                        ContractName = contractName,
+                        FileName = fileName,
+                        CreatedDate = code.VerifyDate.Value,
+                        VerifyDate = code.VerifyDate.Value,
+                        VerifyState = 1,
+                        VerifyCode = code.Code,
+                        IsActive = true,
+                    };
+                    _customerContractDal.Add(customerContract);
+                }
+
+                var contractKvkk = _paramItemDal.Get(c => c.ParamId == ParamEnums.Contracts && c.Value == 1 && c.IsActive);
+
+                var contractExplicit = _paramItemDal.Get(c => c.ParamId == ParamEnums.Contracts && c.Value == 2 && c.IsActive);
+
+                SaveContract("KVKK Aydınlatma Metni", contractKvkk.Name);
+                SaveContract("Açık Rıza Metni", contractExplicit.Name);
+
+                string GetClientIp()
+                {
+                    try
+                    {
+                        var ctx = _httpContextAccessor.HttpContext;
+                        if (ctx == null) return "";
+                        var cf = ctx.Request.Headers["CF-Connecting-IP"].ToString();
+                        if (IPAddress.TryParse(cf, out _)) return cf;
+                        var xff = ctx.Request.Headers["X-Forwarded-For"].ToString();
+                        if (!string.IsNullOrWhiteSpace(xff))
+                        {
+                            var ip = xff.Split(',').Select(s => s.Trim()).FirstOrDefault();
+                            if (IPAddress.TryParse(ip, out _)) return ip!;
+                        }
+                        var xri = ctx.Request.Headers["X-Real-IP"].ToString();
+                        if (IPAddress.TryParse(xri, out _)) return xri;
+                        return ctx.Connection.RemoteIpAddress?.ToString() ?? "";
+                    }
+                    catch { return ""; }
+                }
             }
-
-            var contractKvkk = _paramItemDal.Get(c => c.ParamId == ParamEnums.Contracts && c.Value == 1 && c.IsActive);
-
-            var contractExplicit = _paramItemDal.Get(c => c.ParamId == ParamEnums.Contracts && c.Value == 2 && c.IsActive);
-
-            SaveContract("KVKK Aydınlatma Metni", contractKvkk.Name);
-            SaveContract("Açık Rıza Metni", contractExplicit.Name);
 
             return new SuccessDataResult<int>(customer.Id, Messages.AccountVerifySuccess);
 
-            string GetClientIp()
-            {
-                try
-                {
-                    var ctx = _httpContextAccessor.HttpContext;
-                    if (ctx == null) return "";
-                    var cf = ctx.Request.Headers["CF-Connecting-IP"].ToString();
-                    if (IPAddress.TryParse(cf, out _)) return cf;
-                    var xff = ctx.Request.Headers["X-Forwarded-For"].ToString();
-                    if (!string.IsNullOrWhiteSpace(xff))
-                    {
-                        var ip = xff.Split(',').Select(s => s.Trim()).FirstOrDefault();
-                        if (IPAddress.TryParse(ip, out _)) return ip!;
-                    }
-                    var xri = ctx.Request.Headers["X-Real-IP"].ToString();
-                    if (IPAddress.TryParse(xri, out _)) return xri;
-                    return ctx.Connection.RemoteIpAddress?.ToString() ?? "";
-                }
-                catch { return ""; }
-            }
         }
     }
 }

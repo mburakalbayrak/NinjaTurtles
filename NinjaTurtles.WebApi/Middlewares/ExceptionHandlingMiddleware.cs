@@ -1,5 +1,8 @@
-using System.Net;
+using NinjaTurtles.Business.Constants;
+using NinjaTurtles.Core.Utilities.Results;
+using NinjaTurtles.Entities.Dtos;
 using Serilog;
+using System.Net;
 using System.Text.Json;
 
 namespace NinjaTurtles.WebApi.Middlewares
@@ -25,15 +28,15 @@ namespace NinjaTurtles.WebApi.Middlewares
 
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-                var payload = new
-                {
-                    success = false,
-                    message = ex.Message,
-                    traceId,
-                    innerException = ex.InnerException?.Message
-                };
-                var json = JsonSerializer.Serialize(payload);
+                var result = new ErrorResult($"{ex.Message} ---->  {ex.InnerException?.Message}");
+                //var payload = new
+                //{
+                //    success = false,
+                //    message = ex.Message,
+                //    traceId,
+                //    innerException = ex.InnerException?.Message
+                //};
+                var json = JsonSerializer.Serialize(result);
                 await context.Response.WriteAsync(json);
             }
         }

@@ -31,6 +31,7 @@ namespace NinjaTurtles.Business.Constants
         public static string UserAlreadyExists = "Kullanıcı zaten mevcut";
         public static string UserRegistered = "Kullanıcı başarıyla kayıt edildi";
         public static string AccessTokenCreated = "Access token başarıyla oluşturuldu";
+        public static string ErrorResult = "Bir hata ile karşılaşıldı";
         public static string QrReadNotificationMailTemplate = @"<!doctype html>
 <html lang=""tr"">
 <head>

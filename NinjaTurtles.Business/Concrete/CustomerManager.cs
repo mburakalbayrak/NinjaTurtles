@@ -138,7 +138,7 @@ namespace NinjaTurtles.Business.Concrete
                 customer.IsActive = true;
                 _customerDal.Update(customer);
 
-                string directory = Path.Combine(@"D:\vhosts\karekodla.com\UploadFiles\Contracts", $"{customer.FirstName}_{customer.LastName}_{customer.Id}");
+                string directory = Path.Combine(@"D:\vhosts\karekodla.com\UploadFiles\Contracts\", $"{customer.FirstName}_{customer.LastName}_{customer.Id}");
 
                 IHtmlToPdf htmlToPdf = new HtmlToPdf(_converter);
 
@@ -156,7 +156,7 @@ namespace NinjaTurtles.Business.Concrete
                 void SaveContract(string contractName, string explanation)
                 {
                     var contractText = CreateContract(contractName, explanation);
-                    var fileName = $"{contractName}_{customer.FirstName}_{customer.LastName}.pdf";
+                    var fileName = $"{customer.FirstName}_{customer.LastName}_{contractName}.pdf";
                     var formFile = htmlToPdf.ConvertHtml(contractText, "");
                     WriteFile.CreateFileFromBytes(new CreateFileByteWithFileNameDto
                     {

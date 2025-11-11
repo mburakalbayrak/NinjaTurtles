@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
@@ -27,9 +27,9 @@
 		<ProjectReference Include="..\NinjaTurtles.DataAccess\NinjaTurtles.DataAccess.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<None Update="libwkhtmltox.dll">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
+		<None Include="runtimes\win-x86\native\libwkhtmltox.dll"
+			  CopyToOutputDirectory="PreserveNewest"
+			  CopyToPublishDirectory="Always" />
 	</ItemGroup>
 
 </Project>

@@ -12,6 +12,7 @@ using NinjaTurtles.Core.Utilities.IoC;
 using NinjaTurtles.Core.Utilities.Security.Enctyption;
 using NinjaTurtles.Core.Utilities.Security.Jwt;
 using Serilog;
+using NinjaTurtles.Business.Concrete.UtilityService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,8 @@ builder.Host.ConfigureContainer<ContainerBuilder>(builder =>
 builder.Services.AddControllers(); // Controller'lar için gerekli
 builder.Services.AddEndpointsApiExplorer();
 
+var context = new CustomAssemblyLoadContext();
+context.LoadUnmanagedLibrary(AppContext.BaseDirectory);
 builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 
 builder.Services.AddSwaggerGen(options =>

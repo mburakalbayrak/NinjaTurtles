@@ -7,7 +7,7 @@ namespace NinjaTurtles.Core.Helpers
 
         public static int NextSixDigitCode()
         {
-            int value = RandomNumberGenerator.GetInt32(0, 1_000_000); 
+            int value = RandomNumberGenerator.GetInt32(100_000, 1_000_000); 
             return value;
         }
 

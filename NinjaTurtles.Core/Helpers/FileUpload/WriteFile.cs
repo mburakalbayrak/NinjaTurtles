@@ -94,7 +94,7 @@ namespace NinjaTurtles.Core.Helpers.FileUpload
                     Directory.CreateDirectory(dto.FolderPath);
                 }
                 var extension = Path.GetExtension(dto.FileName);
-                fileName = Path.GetFileNameWithoutExtension(dto.FileName) + "_" + DateTime.Now.Ticks + extension;
+                fileName = Path.GetFileNameWithoutExtension(dto.FileName) + extension;
                 var path = Path.Combine(dto.FolderPath, fileName);
 
                 File.WriteAllBytes(path, dto.File);

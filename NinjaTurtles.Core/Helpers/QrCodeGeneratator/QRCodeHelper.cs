@@ -31,7 +31,7 @@ namespace NinjaTurtles.Core.Helpers.QrCodeGeneratator
             var pngQr = new PngByteQRCode(qrData);
             byte[] qrPngBytes = pngQr.GetGraphic(
             pixelsPerModule: pixelsPerModule,
-                darkColorRgba: RgbaBytes("#089E6E"),      // siyah
+                darkColorRgba: RgbaBytes("#000000"),      // siyah
                 lightColorRgba: RgbaBytes("#FFFF"), // saydam
                 drawQuietZones: false
             );

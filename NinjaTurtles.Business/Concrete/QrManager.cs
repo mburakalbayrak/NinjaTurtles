@@ -421,6 +421,8 @@ namespace NinjaTurtles.Business.Concrete
             {
                 var directory = @"D:\vhosts\karekodla.com\UploadFiles\";
                 //string directory = _config.GetSection("Directories:FileDirectory").Value;
+
+                string path = System.IO.Path.Combine(directory, "ProfilePictures");
                 var extension = System.IO.Path.GetExtension(dto.File.FileName);
                 var fileName = $"{qrHuman.FullName}_{DateTime.Now:yyyyMMdd_HHmmss}{extension}";
                 CreateFileWithFileNameDto uploadFile = new CreateFileWithFileNameDto()

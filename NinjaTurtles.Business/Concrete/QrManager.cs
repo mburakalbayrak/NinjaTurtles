@@ -89,11 +89,16 @@ namespace NinjaTurtles.Business.Concrete
                     //string directory = _config.GetSection("Directories:FileDirectory").Value;
 
                     string path = System.IO.Path.Combine(directory, "ProfilePictures");
+
+                    // Get file extension
+                    var extension = System.IO.Path.GetExtension(dto.File.FileName);
+                    var fileName = $"{qrHuman.FullName}_{DateTime.Now:yyyyMMdd_HHmmss}{extension}";
+
                     CreateFileWithFileNameDto uploadFile = new CreateFileWithFileNameDto()
                     {
                         File = dto.File,
                         FolderPath = path,
-                        FileName = qrHuman.FullName + "_" + DateTime.Now.ToShortDateString() + "_" + DateTime.Now.ToShortTimeString() + "_" + dto.File.FileName
+                        FileName = fileName
                     };
                     var file = WriteFile.CreateFileWithFileName(uploadFile).Data;
                     qrHuman.ProfilePictureUrl = uploadFile.FileName;
@@ -411,16 +416,18 @@ namespace NinjaTurtles.Business.Concrete
             var qrHuman = _mapper.Map(dto, qrHumanData);
             qrHuman.ModifiedBy = 1;
             qrHuman.ModifiedDate = DateTime.Now;
+           
             if (dto.File != null)
             {
                 var directory = @"D:\vhosts\karekodla.com\UploadFiles\";
                 //string directory = _config.GetSection("Directories:FileDirectory").Value;
-
+                var extension = System.IO.Path.GetExtension(dto.File.FileName);
+                var fileName = $"{qrHuman.FullName}_{DateTime.Now:yyyyMMdd_HHmmss}{extension}";
                 CreateFileWithFileNameDto uploadFile = new CreateFileWithFileNameDto()
                 {
                     File = dto.File,
                     FolderPath = directory,
-                    FileName = qrHuman.FullName + "_" + DateTime.Now.ToShortDateString() + "_" + DateTime.Now.ToShortTimeString() + "_" + dto.File.FileName
+                    FileName = fileName
                 };
                 var file = WriteFile.CreateFileWithFileName(uploadFile).Data;
                 if (qrHuman.ProfilePictureUrl != null)

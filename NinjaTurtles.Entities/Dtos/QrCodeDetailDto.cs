@@ -41,7 +41,7 @@ namespace NinjaTurtles.Entities.Dtos
         public string? Url { get; set; } // Url Link ekleyebilir
         public bool RedirectUrl { get; set; } // Url Link ekleyebilir
         public string? Description { get; set; } // Bireysel Not olarak da kullanılabilir 
-        public string? ProfilePictureData { get; set; } 
+        public bool IsProfilePicture { get; set; } 
     }
 
 

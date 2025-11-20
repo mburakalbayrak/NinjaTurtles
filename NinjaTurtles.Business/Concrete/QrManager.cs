@@ -4,12 +4,15 @@ using Microsoft.Extensions.Configuration;
 using NinjaTurtles.Business.Abstract;
 using NinjaTurtles.Business.Constants;
 using NinjaTurtles.Core.DataAccess.Concrete.Dto;
+using NinjaTurtles.Core.Entities;
+using NinjaTurtles.Core.Extensions;
 using NinjaTurtles.Core.Helpers.FileUpload;
 using NinjaTurtles.Core.Helpers.MailServices;
 using NinjaTurtles.Core.Utilities.Results;
 using NinjaTurtles.DataAccess.Abstract;
 using NinjaTurtles.Entities.Concrete;
 using NinjaTurtles.Entities.Dtos;
+using System.Formats.Tar;
 using System.Net;
 using static QRCoder.PayloadGenerator;
 
@@ -203,12 +206,9 @@ namespace NinjaTurtles.Business.Concrete
             {
                 var directory = @"D:\vhosts\karekodla.com\UploadFiles\";
                 string filePath = Path.Combine(directory, "ProfilePictures", qrHuman.ProfilePictureUrl);
+
                 if (System.IO.File.Exists(filePath))
-                {
-                    FileInfo fileInfo = new FileInfo(filePath);
-                    var bytes = File.ReadAllBytes(filePath);
-                    qrDto.ProfilePictureData = Convert.ToBase64String(bytes);
-                }
+                    qrDto.IsProfilePicture = true;
             }
             qrDto.Gender = paramList.FirstOrDefault(c => c.Id == qrHuman.GenderId)?.Name;
             qrDto.MaritalStatus = paramList.FirstOrDefault(c => c.Id == qrHuman.MaritalStatusId)?.Name;
@@ -248,11 +248,7 @@ namespace NinjaTurtles.Business.Concrete
                             var directory = @"D:\vhosts\karekodla.com\UploadFiles\";
                             string filePath = Path.Combine(directory, "ProfilePictures", qrHuman.ProfilePictureUrl);
                             if (System.IO.File.Exists(filePath))
-                            {
-                                FileInfo fileInfo = new FileInfo(filePath);
-                                var bytes = File.ReadAllBytes(filePath);
-                                qrDto.HumanDetail.ProfilePictureData = Convert.ToBase64String(bytes);
-                            }
+                                qrDto.HumanDetail.IsProfilePicture = true;
                         }
                         qrDto.HumanDetail.Gender = qrHuman.GenderId != null ? paramList.FirstOrDefault(c => c.Id == qrHuman.GenderId)?.Name : null;
                         qrDto.HumanDetail.MaritalStatus = qrHuman.MaritalStatusId != null ? paramList.FirstOrDefault(c => c.Id == qrHuman.MaritalStatusId)?.Name : null;
@@ -416,7 +412,7 @@ namespace NinjaTurtles.Business.Concrete
             var qrHuman = _mapper.Map(dto, qrHumanData);
             qrHuman.ModifiedBy = 1;
             qrHuman.ModifiedDate = DateTime.Now;
-           
+
             if (dto.File != null)
             {
                 var directory = @"D:\vhosts\karekodla.com\UploadFiles\";
@@ -580,6 +576,19 @@ namespace NinjaTurtles.Business.Concrete
                 mailBody,
                 "Karekodla – QR Okuma Uyarısı",
                 true);
+        }
+
+        public async Task<FileStreamMemoryResult> GetFile(FilterQrProfilePictureDto dto)
+        {
+            var qrHuman = _qrCodeHumanDetailDal.Get(c => c.QrMainId == dto.Id);
+            var directory = @"D:\vhosts\karekodla.com\UploadFiles\";
+            string filePath = Path.Combine(directory, "ProfilePictures", qrHuman.ProfilePictureUrl);
+
+            FileInfo fileInfo = new FileInfo(filePath);
+            var memory = await filePath.FileFromPathToMemoryStreamAsync();
+            var fileData = new FileStreamMemoryResult()
+            { Stream = memory, FileName = qrHuman.ProfilePictureUrl, EnableRangeProcessing = true, MimeType = fileInfo.Extension.GetContentType() };
+            return fileData;
         }
     }
 }

@@ -25,6 +25,13 @@ namespace NinjaTurtles.WebApi.Controllers
         }
 
 
+        [HttpGet("[action]")]
+        public async Task<IActionResult> GetQrProfilePicture([FromQuery] FilterQrProfilePictureDto dto)
+        {
+            var qr = await _qrService.GetFile(dto);
+            return File(qr.Stream, qr.MimeType, qr.FileName, qr.EnableRangeProcessing);
+        }
+
         [HttpPost("[action]")]
         public IActionResult CreateRedirectUrl([FromBody] QrRedirectUrlDto dto)
         {

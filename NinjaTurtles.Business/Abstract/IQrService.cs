@@ -6,6 +6,7 @@ namespace NinjaTurtles.Business.Abstract
     public interface IQrService
     {
         Task<IDataResult<QrCodeDetailDto>> GetQrDetail(FilterQrDetailDto dto);
+        Task<FileStreamMemoryResult> GetFile(FilterQrProfilePictureDto dto);
         IResult CreateHumanDetail(QrCodeHumanCreateDto dto);
         IResult CreateRedirectUrl(QrRedirectUrlDto dto);
         IResult UpdateRedirectUrl(QrRedirectUrlUpdateDto dto);

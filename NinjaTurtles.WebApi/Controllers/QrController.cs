@@ -88,11 +88,5 @@ namespace NinjaTurtles.WebApi.Controllers
             return Ok(result);
         }
 
-        [HttpGet("[action]")]
-        public IActionResult GetCurrentDirectory()
-        {
-            var currentdirectory = Directory.GetCurrentDirectory();
-            return Ok(currentdirectory);
-        }
     }
 }

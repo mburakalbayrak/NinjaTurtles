@@ -72,10 +72,10 @@ namespace NinjaTurtles.Business.Concrete
                 for (int i = 1; i <= cod.Quantity; i++)
                 {
                     var guid = Guid.NewGuid();
-                    var filePath = $"{directory}/{company.ShortName}#{companyOrderCount}#{i}.png";
+                    var filePath = $"{directory}/{company.ShortName}#{1}#{i}000.png";
                     var barcodeContent = url + guid;
 
-                    var labelText = $"{company.ShortName}#{companyOrderCount}#{i}";
+                    var labelText = $"Acil#{1}#{1}000";
                     var saved = await QRCodeHelper.GenerateQrWithLabelAsync(
     content: barcodeContent,
     labelText: labelText,

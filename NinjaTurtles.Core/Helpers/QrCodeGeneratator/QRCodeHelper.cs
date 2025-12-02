@@ -20,7 +20,7 @@ namespace NinjaTurtles.Core.Helpers.QrCodeGeneratator
          int pixelsPerModule = 20,
          int margin = 10,
          string? fontFilePath = null,
-         float initialFontSize = 24f,
+         float initialFontSize = 100f,
          float minFontSize = 10f,
          int quietZoneModules = 1 // <-- eklendi
      )

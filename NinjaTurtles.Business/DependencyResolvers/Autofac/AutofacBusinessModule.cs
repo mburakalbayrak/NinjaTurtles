@@ -28,6 +28,7 @@ namespace NinjaTurtles.Business.DependencyResolvers.Autofac
             builder.RegisterType<EfQrLogDal>().As<IQrLogDal>().InstancePerLifetimeScope();
             builder.RegisterType<EfUserDal>().As<IUserDal>().InstancePerLifetimeScope();
             builder.RegisterType<EfCustomerContractDal>().As<ICustomerContractDal>().InstancePerLifetimeScope();
+            builder.RegisterType<EfSupportTaskDal>().As<ISupportTaskDal>().InstancePerLifetimeScope();
 
             builder.RegisterType<QrManager>().As<IQrService>().InstancePerLifetimeScope();
             builder.RegisterType<CustomerManager>().As<ICustomerService>().InstancePerLifetimeScope();
@@ -36,6 +37,7 @@ namespace NinjaTurtles.Business.DependencyResolvers.Autofac
             builder.RegisterType<ParamManager>().As<IParamService>().InstancePerLifetimeScope();
             builder.RegisterType<UserManager>().As<IUserService>().InstancePerLifetimeScope();
             builder.RegisterType<AuthManager>().As<IAuthService>().InstancePerLifetimeScope();
+            builder.RegisterType<SupportTaskManager>().As<ISupportTaskService>().InstancePerLifetimeScope();
             builder.RegisterType<JwtHelper>().As<ITokenHelper>().InstancePerLifetimeScope();
 
             builder.RegisterType<HttpContextAccessor>()

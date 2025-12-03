@@ -32,6 +32,8 @@ namespace NinjaTurtles.Business.Constants
         public static string UserRegistered = "Kullanıcı başarıyla kayıt edildi";
         public static string AccessTokenCreated = "Access token başarıyla oluşturuldu";
         public static string ErrorResult = "Bir hata ile karşılaşıldı";
+        public static string SendReportSuccess = "Destek talebiniz iletilmiştir. Destek ekibimiz tarafından kısa süre içerisinde mailinize dönüş yapılacaktır.";
+
         public static string QrReadNotificationMailTemplate = @"<!doctype html>
 <html lang=""tr"">
 <head>
@@ -120,6 +122,91 @@ namespace NinjaTurtles.Business.Constants
 
     <div class=""footer"">
       © {{year}} Karekodla • <a href=""{{securityUrl}}"">Güvenlik Merkezi</a> • <a href=""{{helpUrl}}"">Yardım</a>
+    </div>
+  </div>
+</body>
+</html>";
+
+        public static string SendReportMailTemplate = @"<!doctype html>
+<html lang=""tr"">
+<head>
+  <meta charset=""utf-8"">
+  <meta name=""viewport"" content=""width=device-width,initial-scale=1"">
+  <title>Karekodla – Destek Talebi</title>
+
+  <style>
+    body {
+      margin:0; padding:0; background:#f6f7f9;
+      font-family:""Inter"",-apple-system,BlinkMacSystemFont,""Segoe UI"",Helvetica,Arial,sans-serif,""Apple Color Emoji"",""Segoe UI Emoji"";
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
+    .container { max-width:600px; margin:0 auto; padding:24px; }
+    .brand-strip { background:#10b981; background:linear-gradient(135deg,#10b981,#059669); border-radius:14px; padding:16px 20px; }
+    .card { background:#ffffff; border-radius:14px; padding:28px; margin-top:-12px; box-shadow:0 8px 24px rgba(2,6,23,0.06); border:1px solid #e5e7eb; }
+    .brand { text-align:center; }
+    .brand img { height:140px; width:auto; display:inline-block; }
+
+    h1 { font-size:22px; margin:0 0 10px; color:#0b1324; letter-spacing:0.2px; font-weight:700; }
+    p  { font-size:14px; line-height:1.65; color:#374151; margin:0 0 14px; }
+
+    .row { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; border-bottom:1px dashed #e5e7eb; padding:8px 0; font-size:13px; }
+    .k { color:#6b7280; min-width:140px; }
+    .v { color:#111827; text-align:right; }
+
+    .cta { text-align:center; margin:18px 0 4px; }
+    .btn {
+      display:inline-block; padding:12px 20px; text-decoration:none; border-radius:12px;
+      background:#10b981; color:#ffffff !important; font-weight:700; border:1px solid #059669;
+      font-family:""Inter"",-apple-system,BlinkMacSystemFont,""Segoe UI"",Helvetica,Arial,sans-serif,""Apple Color Emoji"",""Segoe UI Emoji"";
+    }
+
+    .muted { color:#6b7280; font-size:12px; }
+    .footer { text-align:center; color:#9ca3af; font-size:12px; margin-top:16px; }
+    a { color:#059669; }
+
+    @media (prefers-color-scheme: dark) {
+      body { background:#0b0c0f; }
+      .card { background:#0f1117; border-color:#1f2937; box-shadow:none; }
+      h1 { color:#e5e7eb; }
+      p, .muted, .footer, .k, .v { color:#cbd5e1; }
+      .row { border-color:#1f2937; }
+      .btn { background:#10b981; border-color:#34d399; }
+      a { color:#34d399; }
+    }
+
+    @media screen and (max-width:480px){
+      .container{ padding:16px; }
+      .brand img{ height:120px; }
+      .card{ padding:22px; }
+      .row{ font-size:12px; }
+    }
+  </style>
+
+  <!--[if mso]>
+  <style type=""text/css"">
+    body, p, h1, a, span, div { font-family: Arial, sans-serif !important; }
+  </style>
+  <![endif]-->
+</head>
+<body>
+  <div class=""container"">
+
+    <div class=""brand-strip"">
+      <div class=""brand"">
+        <img src=""https://karekodla.com/logo.png"" alt=""Karekodla logosu"">
+      </div>
+    </div>
+
+    <div class=""card"" role=""presentation"">
+       <div class=""row""><div class=""k"">Gönderen</div><div class=""v"">{{NameSurName}}</div></div>
+       <div class=""row""><div class=""k"">Konu</div><div class=""v"">{{Subject}}</div></div>
+       <div class=""row""><div class=""k"">Mesaj</div><div class=""v"">{{Message}}</div></div>
+       <div class=""row""><div class=""k"">Hata</div><div class=""v"">{{Error}}</div></div>
+       <div class=""row""><div class=""k"">Guid</div><div class=""v"">{{Guid}}</div></div>
+
+     
+    <div class=""footer"">
+      © {{year}} Karekodla
     </div>
   </div>
 </body>

@@ -54,7 +54,7 @@ namespace NinjaTurtles.Business.Concrete
             try
             {
                 var cod = new CompanyOrderDetail();
-                cod.CompanyOrderId = dto.CompanyId;
+                cod.CompanyId = dto.CompanyId;
                 cod.ProductId = dto.ProductId;
                 cod.Quantity = dto.Quantity;
                 cod.LicenceUnitPrice = dto.LicenceUnitPrice;
@@ -62,9 +62,9 @@ namespace NinjaTurtles.Business.Concrete
                 cod.IsActive = true;
                 _companyOrderDetail.Add(cod);
 
-                var company = _company.Get(c => c.Id == cod.CompanyOrderId);
+                var company = _company.Get(c => c.Id == cod.CompanyId);
 
-                var companyOrderCount = _companyOrderDetail.GetList(c => c.CompanyOrderId == cod.CompanyOrderId && c.IsActive).Count();
+                var companyOrderCount = _companyOrderDetail.GetList(c => c.CompanyId == cod.CompanyId && c.IsActive).Count();
                 string directory = Path.Combine(@"D:\vhosts\karekodla.com\UploadFiles\QrCode", company.Name, cod.Id.ToString());
                 DirectoryInfo di = Directory.CreateDirectory(directory);
 

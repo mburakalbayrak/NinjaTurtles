@@ -4,7 +4,7 @@ namespace NinjaTurtles.Entities.Concrete
 {
     public class CompanyOrderDetail: BaseEntity<int>, IEntity
     {
-        public int CompanyOrderId { get; set; }
+        public int CompanyId { get; set; }
         public double LicenceUnitPrice { get; set; }
         public int Quantity { get; set; }
         public int TotalPrice { get; set; }

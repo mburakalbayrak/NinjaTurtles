@@ -493,17 +493,7 @@ namespace NinjaTurtles.Business.Concrete
             var qr = _qrCodeMainDal.Get(c => c.Id == id && (!c.IsDeleted && c.IsActive));
             var customer = _customerDal.Get(c => c.Id == qr.CustomerId);
 
-            string clientIp = GetClientIp();
-            var qrlog = new QrLog
-            {
-                LogTypeId = 1,
-                QrCodeMainId = qr.Id,
-                IpAddress = clientIp,
-                CreatedDate = DateTime.Now,
-                CreatedBy = 1,
-                IsActive = true,
-            };
-            _qrLogDal.Add(qrlog);
+          
             // Istanbul saati
             var trTz = TimeZoneInfo.FindSystemTimeZoneById("Europe/Istanbul");
             var nowTr = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, trTz);
@@ -515,8 +505,8 @@ namespace NinjaTurtles.Business.Concrete
 
             // 2) Varsayılan: IP'den şehir/ilçe/ülke (+ yaklaşık lat/lng varsa harita)
             string city = "", district = "", country = "", mapUrl = "";
-            clientIp = GetClientIp();
-
+            string clientIp = GetClientIp();
+           
             try
             {
                 if (headerLat.HasValue && headerLng.HasValue)
@@ -551,7 +541,19 @@ namespace NinjaTurtles.Business.Concrete
             }
             catch { /* sessiz geç */ }
 
-            // ---- ŞABLON REPLACE (mail kısmına dokunmadan, body'yi hazırlıyoruz) ----
+            var qrlog = new QrLog
+            {
+                LogTypeId = 1,
+                QrCodeMainId = qr.Id,
+                IpAddress = clientIp,
+                Latitude = headerLat,
+                Longitude = headerLng,
+                Location = $"{city} / {district} / {country}",
+                CreatedDate = DateTime.Now,
+                CreatedBy = 1,
+                IsActive = true,
+            };
+            _qrLogDal.Add(qrlog);
             var tpl = Messages.QrReadNotificationMailTemplate
                 .Replace("{{ownerName}}", $"{customer.FirstName} {customer.LastName}")
                 .Replace("{{scanTime}}", scanTime)

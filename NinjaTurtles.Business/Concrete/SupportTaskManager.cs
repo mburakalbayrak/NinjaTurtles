@@ -27,6 +27,7 @@ namespace NinjaTurtles.Business.Concrete
 
             var tpl = Messages.SendReportMailTemplate
                .Replace("{{NameSurName}}", $"{dto.NameSurName}")
+               .Replace("{{Mail}}", $"{dto.Email}")
                .Replace("{{Subject}}", dto.Subject)
                .Replace("{{Message}}", dto.Message)
                .Replace("{{Error}}", dto.Error)

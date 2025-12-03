@@ -199,6 +199,7 @@ namespace NinjaTurtles.Business.Constants
 
     <div class=""card"" role=""presentation"">
        <div class=""row""><div class=""k"">Gönderen</div><div class=""v"">{{NameSurName}}</div></div>
+       <div class=""row""><div class=""k"">Mail</div><div class=""v"">{{Mail}}</div></div>
        <div class=""row""><div class=""k"">Konu</div><div class=""v"">{{Subject}}</div></div>
        <div class=""row""><div class=""k"">Mesaj</div><div class=""v"">{{Message}}</div></div>
        <div class=""row""><div class=""k"">Hata</div><div class=""v"">{{Error}}</div></div>

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,14 +20,14 @@ namespace NinjaTurtles.Core.Utilities.Security.Jwt
         public IConfiguration Configuration { get; }
         private TokenOptions _tokenOptions;
         DateTime _accessTokenExpiration;
+        DateTime _refreshTokenExpiration;
 
         public JwtHelper(IConfiguration configuration)
         {
             Configuration = configuration;
-            _tokenOptions = AppConfig.Configuration.GetSection("TokenOptions").Get<TokenOptions>();
+            _tokenOptions = configuration.GetSection("TokenOptions").Get<TokenOptions>();
             _accessTokenExpiration = DateTime.Now.AddMinutes(_tokenOptions.AccessTokenExpiration);
-
-            //_tokenOptions = Configuration.GetSection("TokenOptions").Get<TokenOptions>();
+            _refreshTokenExpiration = DateTime.Now.AddMinutes(_tokenOptions.RefreshTokenExpiration);
         }
 
         public AccessToken CreateToken(User user, List<OperationClaim> operationClaims)
@@ -41,7 +42,13 @@ namespace NinjaTurtles.Core.Utilities.Security.Jwt
 
             var token = jwtSecurityTokenHandler.WriteToken(jwt);
 
-            return new AccessToken { Expiration = _accessTokenExpiration, Token = token };
+            return new AccessToken
+            {
+                Expiration = _accessTokenExpiration,
+                Token = token,
+                RefreshToken = GenerateRefreshToken(),
+                RefreshTokenExpiration = _refreshTokenExpiration
+            };
 
         }
 
@@ -69,6 +76,14 @@ namespace NinjaTurtles.Core.Utilities.Security.Jwt
             claims.AddRoles(operationClaims.Select(x => x.Name).ToArray());
 
             return claims;
+        }
+
+        private string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
         }
     }
 }

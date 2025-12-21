@@ -31,5 +31,15 @@ namespace NinjaTurtles.Business.Concrete
         {
             return _userDal.GetClaims(user);
         }
+
+        public User GetByRefreshToken(string refreshToken)
+        {
+            return _userDal.Get(x => x.RefreshToken == refreshToken && x.IsActive && !x.IsDeleted);
+        }
+
+        public void UpdateRefreshToken(User user)
+        {
+            _userDal.Update(user);
+        }
     }
 }

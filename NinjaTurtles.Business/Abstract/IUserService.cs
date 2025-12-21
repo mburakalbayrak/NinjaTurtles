@@ -14,5 +14,7 @@ namespace NinjaTurtles.Business.Abstract
         int Add(User user);
 
         User GetByMail(string email);
+        User GetByRefreshToken(string refreshToken);
+        void UpdateRefreshToken(User user);
     }
 }

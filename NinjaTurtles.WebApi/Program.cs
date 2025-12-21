@@ -78,14 +78,14 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // JWT
-var tokenOptions = AppConfig.Configuration.GetSection("TokenOptions").Get<TokenOptions>();
+var tokenOptions = builder.Configuration.GetSection("TokenOptions").Get<TokenOptions>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
-        ValidateLifetime = false, // token olsun yeter diyorsak bu false olacak, true olacaksa süreye bakar
+        ValidateLifetime = true, // Token süresini kontrol et (güvenlik için)
         ValidIssuer = tokenOptions?.Issuer,
         ValidAudience = tokenOptions?.Audience,
         ValidateIssuerSigningKey = true,

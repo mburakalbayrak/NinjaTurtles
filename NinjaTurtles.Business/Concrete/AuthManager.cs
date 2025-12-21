@@ -28,6 +28,12 @@ namespace NinjaTurtles.Business.Concrete
         {
             var claims = _userService.GetClaims(user);
             var accessToken = _tokenHelper.CreateToken(user, claims);
+            
+            // Refresh token'ı kullanıcıya kaydet
+            user.RefreshToken = accessToken.RefreshToken;
+            user.RefreshTokenExpiry = accessToken.RefreshTokenExpiration;
+            _userService.UpdateRefreshToken(user);
+            
             return new SuccessDataResult<Core.Utilities.Security.Jwt.AccessToken>(accessToken, Messages.AccessTokenCreated);
         }
 
@@ -79,6 +85,39 @@ namespace NinjaTurtles.Business.Concrete
             }
 
             return new SuccessResult();
+        }
+
+        public IDataResult<Core.Utilities.Security.Jwt.AccessToken> RefreshToken(string refreshToken)
+        {
+            var user = _userService.GetByRefreshToken(refreshToken);
+            
+            if (user == null)
+            {
+                return new ErrorDataResult<Core.Utilities.Security.Jwt.AccessToken>("Geçersiz refresh token");
+            }
+
+            if (user.RefreshTokenExpiry < DateTime.Now)
+            {
+                return new ErrorDataResult<Core.Utilities.Security.Jwt.AccessToken>("Refresh token süresi dolmuş");
+            }
+
+            return CreateAccessToken(user);
+        }
+
+        public IResult RevokeToken(string refreshToken)
+        {
+            var user = _userService.GetByRefreshToken(refreshToken);
+            
+            if (user == null)
+            {
+                return new ErrorResult("Geçersiz refresh token");
+            }
+
+            user.RefreshToken = null;
+            user.RefreshTokenExpiry = null;
+            _userService.UpdateRefreshToken(user);
+
+            return new SuccessResult("Token iptal edildi");
         }
     }
 }

@@ -19,5 +19,8 @@ namespace NinjaTurtles.Core.Entities.Concrete
         public byte[] PasswordSalt { get; set; }
         public byte[] PasswordHash { get; set; }
         public bool IsDeleted { get; set; }
+        [MaxLength(500)]
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiry { get; set; }
     }
 }

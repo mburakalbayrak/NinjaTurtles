@@ -19,5 +19,7 @@ namespace NinjaTurtles.Business.Abstract
         IResult UserExists(string email);
 
         IDataResult<Core.Utilities.Security.Jwt.AccessToken> CreateAccessToken(User user);
+        IDataResult<Core.Utilities.Security.Jwt.AccessToken> RefreshToken(string refreshToken);
+        IResult RevokeToken(string refreshToken);
     }
 }
